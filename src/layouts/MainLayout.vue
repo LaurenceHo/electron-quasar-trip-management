@@ -13,30 +13,44 @@
         <q-list padding>
           <q-item clickable v-ripple>
             <q-item-section avatar>
-              <q-icon name="mdi-inbox" />
+              <q-icon name="mdi-plus" />
             </q-item-section>
-            <q-item-section> Inbox </q-item-section>
+            <q-item-section> New trip </q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="mdi-format-list-bulleted" />
+            </q-item-section>
+            <q-item-section> All </q-item-section>
           </q-item>
 
           <q-item clickable v-ripple>
             <q-item-section avatar>
               <q-icon name="mdi-star-outline" />
             </q-item-section>
-            <q-item-section> Star </q-item-section>
+            <q-item-section> Starred </q-item-section>
           </q-item>
+
+          <q-expansion-item expand-separator icon="mdi-filter-variant" label="Filter">
+            <q-list padding>
+              <q-item clickable class="q-pl-md">
+                <q-item-section> Upcoming </q-item-section>
+              </q-item>
+              <q-item clickable class="q-pl-md">
+                <q-item-section> Currently Traveling </q-item-section>
+              </q-item>
+              <q-item clickable class="q-pl-md">
+                <q-item-section> Past </q-item-section>
+              </q-item>
+            </q-list>
+          </q-expansion-item>
 
           <q-item clickable v-ripple>
             <q-item-section avatar>
-              <q-icon name="mdi-send" />
+              <q-icon name="mdi-inbox-arrow-down" />
             </q-item-section>
-            <q-item-section> Send </q-item-section>
-          </q-item>
-
-          <q-item clickable v-ripple>
-            <q-item-section avatar>
-              <q-icon name="mdi-email-open" />
-            </q-item-section>
-            <q-item-section> Drafts </q-item-section>
+            <q-item-section> Archived </q-item-section>
           </q-item>
         </q-list>
       </q-scroll-area>

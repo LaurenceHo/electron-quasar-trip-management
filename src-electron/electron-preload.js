@@ -1,17 +1,8 @@
 /**
- * This file is used specifically for security reasons.
- * Here you can access Nodejs stuff and inject functionality into
- * the renderer thread (accessible there through the "window" object)
- *
- * WARNING!
- * If you import anything from node_modules, then make sure that the package is specified
- * in package.json > dependencies and NOT in devDependencies
- *
- * Example (injects window.myAPI.doAThing() into renderer thread):
- *
- *   const { contextBridge } = require('electron')
- *
- *   contextBridge.exposeInMainWorld('myAPI', {
- *     doAThing: () => {}
- *   })
+ *   Ref: https://www.electronjs.org/docs/api/context-bridge
  */
+import { contextBridge, ipcRenderer } from 'electron';
+contextBridge.exposeInMainWorld('tripApi', {
+  createTrip: async (data) => await ipcRenderer.invoke('createTrip', data),
+  findAllTrips: async () => await ipcRenderer.invoke('findAllTrips'),
+});

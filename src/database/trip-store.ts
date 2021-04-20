@@ -1,56 +1,48 @@
 import Ajv from 'ajv';
-import Datastore from 'nedb-promises';
+import addFormats from 'ajv-formats';
+import BaseStore from './base-store';
 import { Trip, TripSchema } from './schemas';
 
-export default class TripStore {
-  dbPath = './src/database/trip.db';
-  db = Datastore.create({
-    filename: this.dbPath,
-    timestampData: true,
-    autoload: true
-  });
-
+export default class TripStore extends BaseStore<Trip> {
   validate(data: Trip): boolean {
     const ajv = new Ajv({
       allErrors: true,
       useDefaults: true,
     });
+    addFormats(ajv);
+    ajv.addFormat('custom-date-time', (dateTimeString: any) => {
+      if (typeof dateTimeString === 'object') {
+        dateTimeString = dateTimeString.toISOString();
+      }
+      return !isNaN(Date.parse(dateTimeString));
+    });
     const schemaValidator = ajv.compile(TripSchema);
     return schemaValidator(data);
   }
 
-  create(data: Trip) {
-    const isValid = this.validate(data);
-    if (isValid) {
-      return this.db.insert(data);
-    }
-  }
-
-  findOneById(_id: number) {
-    return this.db.findOne({ _id });
-  }
-
   findByTime(keyword: 'future' | 'current' | 'past') {
     if (keyword === 'future') {
-      return this.db.find({ start_date: { $gt: new Date() } });
+      return this.databaseInstance.find({ startDate: { $gt: new Date() } });
     } else if (keyword === 'current') {
-      return this.db.find({ $and: [{ start_date: { $lte: new Date() } }, { end_date: { $gte: new Date() } }] });
+      return this.databaseInstance.find({
+        $and: [{ startDate: { $lte: new Date() } }, { endDate: { $gte: new Date() } }],
+      });
     } else if (keyword === 'past') {
-      return this.db.find({ end_date: { $lt: new Date() } });
+      return this.databaseInstance.find({ endDate: { $lt: new Date() } });
     } else {
-      return this.db.find({});
+      return this.databaseInstance.find({});
     }
   }
 
-  findStarred() {
-    return this.db.find({ starred: true });
+  findByStarred() {
+    return this.databaseInstance.find({ starred: true });
   }
 
-  findArchived() {
-    return this.db.find({ archived: true });
+  findByArchived() {
+    return this.databaseInstance.find({ archived: true });
   }
 
-  findAll(): any {
-    return this.db.find({});
+  findAll() {
+    return this.databaseInstance.find({}).sort({ startDate: -1 });
   }
 }

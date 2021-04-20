@@ -1,46 +1,47 @@
-export interface TripModel {
+export interface Base {
   _id?: string;
-  timezone_id: string;
-  start_date: string;
-  end_date: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TripModel extends Base {
+  timezoneId: string;
+  startDate: string;
+  endDate: string;
   name?: string;
   destination: string;
   archived?: boolean;
-  trip_day?: TripDayModel[];
+  tripDay?: TripDayModel[];
 }
 
-export interface TripDayModel {
-  _id?: string;
-  trip_id: string;
+export interface TripDayModel extends Base {
+  tripId: string;
   name?: string;
-  trip_date: string;
+  tripDate: string;
   events?: Event[];
 }
 
-export interface EventModel {
-  _id?: string;
-  trip_day_id: string;
-  category_id: string;
-  start_time_timezone_id?: string;
-  end_time_timezone_id?: string;
-  currency_id?: string;
-  start_time?: string;
-  end_time?: string;
+export interface EventModel extends Base {
+  tripDayId: string;
+  categoryId: string;
+  startTimeTimezoneId?: string;
+  endTimeTimezoneId?: string;
+  currencyId?: string;
+  startTime?: string;
+  endTime?: string;
   title: string;
-  start_location?: string;
-  end_location?: string;
+  startLocation?: string;
+  endLocation?: string;
   note?: string;
   tags?: string;
   cost?: number;
 }
 
-export interface CategoryModel {
-  _id: string;
+export interface CategoryModel extends Base {
   name: string;
 }
 
-export interface CurrencyModel {
-  _id: string;
+export interface CurrencyModel extends Base {
   code: string;
   name: string;
 }

@@ -1,6 +1,7 @@
 import { ActionContext, CommitOptions, DispatchOptions, Store as VuexStore } from 'vuex';
 
-type Filter =  'all' | 'starred' | 'future' | 'current' | 'past' | 'archived';
+type Filter = 'all' | 'starred' | 'future' | 'current' | 'past' | 'archived';
+
 export interface StoreState {
   filter: Filter;
 }

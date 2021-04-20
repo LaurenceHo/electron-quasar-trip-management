@@ -1,9 +1,9 @@
-import { actions } from './actions';
-import { mutations } from './mutations';
 import { store } from 'quasar/wrappers';
-import { StoreState } from 'src/store/types';
 import { InjectionKey } from 'vue';
 import { createStore, Store as VuexStore, useStore as vuexUseStore } from 'vuex';
+import { actions } from './actions';
+import { mutations } from './mutations';
+import { StoreState } from './types';
 
 // import example from './module-example'
 // import { ExampleStateInterface } from './module-example/state';

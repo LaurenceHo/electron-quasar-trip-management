@@ -2,7 +2,7 @@
   <q-page class="row items-center justify-evenly">
     <q-btn @click="createTrip">Create trip</q-btn>
     <ul>
-      <li v-for="trip in trips">{{ trip._id }} | {{ trip.start_date }} | {{ trip.end_date }}</li>
+      <li v-for="trip in trips" :key="trip._id">{{ trip._id }} | {{ trip.startDate }} | {{ trip.endDate }}</li>
     </ul>
   </q-page>
 </template>
@@ -29,13 +29,21 @@ export default defineComponent({
 
   methods: {
     async createTrip() {
-      const newTrip = await this.tripApi.createTrip({
-        timezone_id: 1,
-        start_date: new Date(),
-        end_date: new Date(),
+      await this.tripApi.create({
+        timezoneId: '123',
+        startDate: new Date('2020-01-01'),
+        endDate: new Date('2020-01-28'),
         destination: 'somewhere',
       });
-      console.log(newTrip);
+      this.trips = await this.tripApi.findAllTrips();
+    },
+    async updateTrip() {
+      await this.tripApi.updateTrip('HqosslIa0LWvMeCC', {
+        timezoneId: '23456',
+        startDate: new Date('2020-03-01'),
+        endDate: new Date('2020-03-28'),
+        destination: 'somewhere',
+      });
       this.trips = await this.tripApi.findAllTrips();
     },
   },

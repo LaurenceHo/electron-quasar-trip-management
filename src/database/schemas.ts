@@ -1,12 +1,11 @@
 import { JSONSchemaType } from 'ajv';
-import { CategoryModel, CurrencyModel } from 'components/models';
 
 /** Ref: https://ajv.js.org/guide/typescript.html **/
 
 export interface Trip {
-  timezone_id: string;
-  start_date: Date;
-  end_date: string;
+  timezoneId: string;
+  startDate: Date;
+  endDate: Date;
   name?: string;
   destination: string;
   archived?: boolean;
@@ -14,90 +13,77 @@ export interface Trip {
 }
 
 export interface TripDay {
-  trip_id: string;
+  tripId: string;
   name?: string;
-  trip_date: string;
+  tripDate: Date;
 }
 
 export interface Event {
-  trip_day_id: string;
-  category_id: string;
-  start_time_timezone_id?: string;
-  end_time_timezone_id?: string;
-  currency_id?: string;
-  start_time?: string;
-  end_time?: string;
+  tripDayId: string;
+  categoryId: string;
+  startTimeTimezoneId?: string;
+  endTimeTimezoneId?: string;
+  currencyId?: string;
+  startTime?: Date;
+  endTime?: Date;
   title: string;
-  start_location?: string;
-  end_location?: string;
+  startLocation?: string;
+  endLocation?: string;
   note?: string;
   tags?: string;
   cost?: number;
+  order: number;
 }
 
 export interface Category {
   name: string;
 }
 
-export interface Currency {
-  code: string;
-  name: string;
-}
-
 export const TripSchema: JSONSchemaType<Trip> = {
   type: 'object',
   properties: {
-    timezone_id: { type: 'string' },
-    start_date: { type: 'object', format: 'date-time', additionalProperties: false, required: [] },
-    end_date: { type: 'string' },
+    timezoneId: { type: 'string' },
+    startDate: { type: 'object', format: 'custom-date-time', required: [] },
+    endDate: { type: 'object', format: 'custom-date-time', required: [] },
     name: { type: 'string', nullable: true },
     destination: { type: 'string' },
     archived: { type: 'boolean', nullable: true },
     starred: { type: 'boolean', nullable: true },
   },
-  required: ['timezone_id', 'start_date', 'end_date', 'destination'],
+  required: ['timezoneId', 'startDate', 'endDate', 'destination'],
   additionalProperties: false,
 };
 
 export const TripDaySchema: JSONSchemaType<TripDay> = {
   type: 'object',
   properties: {
-    trip_id: { type: 'string' },
+    tripId: { type: 'string' },
     name: { type: 'string', nullable: true },
-    trip_date: { type: 'string', format: 'date' },
+    tripDate: { type: 'object', format: 'custom-date-time', required: [] },
   },
-  required: ['trip_id', 'trip_date'],
+  required: ['tripId', 'tripDate'],
   additionalProperties: false,
 };
 
 export const EventSchema: JSONSchemaType<Event> = {
   type: 'object',
   properties: {
-    trip_day_id: { type: 'string' },
-    category_id: { type: 'string' },
-    start_time_timezone_id: { type: 'string', nullable: true },
-    end_time_timezone_id: { type: 'string', nullable: true },
-    currency_id: { type: 'string', nullable: true },
-    start_time: { type: 'string', format: 'date-time', nullable: true },
-    end_time: { type: 'string', format: 'date-time', nullable: true },
+    tripDayId: { type: 'string' },
+    categoryId: { type: 'string' },
+    startTimeTimezoneId: { type: 'string', nullable: true },
+    endTimeTimezoneId: { type: 'string', nullable: true },
+    currencyId: { type: 'string', nullable: true },
+    startTime: { type: 'object', format: 'custom-date-time', required: [], nullable: true },
+    endTime: { type: 'object', format: 'custom-date-time', required: [], nullable: true },
     title: { type: 'string' },
-    start_location: { type: 'string', nullable: true },
-    end_location: { type: 'string', nullable: true },
+    startLocation: { type: 'string', nullable: true },
+    endLocation: { type: 'string', nullable: true },
     note: { type: 'string', nullable: true },
     tags: { type: 'string', nullable: true },
     cost: { type: 'number', nullable: true },
+    order: { type: 'number' },
   },
-  required: ['trip_day_id', 'category_id', 'title'],
-  additionalProperties: false,
-};
-
-export const CurrencySchema: JSONSchemaType<Currency> = {
-  type: 'object',
-  properties: {
-    code: { type: 'string' },
-    name: { type: 'string' },
-  },
-  required: ['code', 'name'],
+  required: ['tripDayId', 'categoryId', 'title', 'order'],
   additionalProperties: false,
 };
 

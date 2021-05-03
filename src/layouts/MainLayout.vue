@@ -3,7 +3,7 @@
     <q-drawer
       :breakpoint="500"
       :mini="miniState"
-      :width="200"
+      :width="250"
       bordered
       class="bg-grey-3"
       show-if-above
@@ -11,47 +11,46 @@
     >
       <q-scroll-area class="fit">
         <q-list padding>
-          <q-item v-ripple clickable>
-            <q-item-section avatar>
-              <q-icon name="mdi-plus" />
-            </q-item-section>
-            <q-item-section> New trip</q-item-section>
-          </q-item>
-
-          <q-item v-ripple clickable>
-            <q-item-section avatar>
-              <q-icon name="mdi-format-list-bulleted" />
-            </q-item-section>
-            <q-item-section> All</q-item-section>
-          </q-item>
-
-          <q-item v-ripple clickable>
-            <q-item-section avatar>
-              <q-icon name="mdi-star-outline" />
-            </q-item-section>
-            <q-item-section> Starred</q-item-section>
-          </q-item>
-
-          <q-expansion-item expand-separator icon="mdi-filter-variant" label="Filter">
-            <q-list padding>
-              <q-item class="q-pl-md" clickable>
-                <q-item-section> Upcoming</q-item-section>
+          <template v-for="menu in menus">
+            <template v-if="!menu.children">
+              <q-item
+                :key="menu.keyWord"
+                :active="menu.keyWord === selectedMenu"
+                clickable
+                @click="selectedMenu = menu.keyWord"
+              >
+                <q-item-section v-if="menu.icon" avatar>
+                  <q-icon :name="menu.icon" />
+                </q-item-section>
+                <q-item-section>{{ menu.title }}</q-item-section>
               </q-item>
-              <q-item class="q-pl-md" clickable>
-                <q-item-section> Currently Traveling</q-item-section>
-              </q-item>
-              <q-item class="q-pl-md" clickable>
-                <q-item-section> Past</q-item-section>
-              </q-item>
-            </q-list>
-          </q-expansion-item>
-
-          <q-item v-ripple clickable>
-            <q-item-section avatar>
-              <q-icon name="mdi-inbox-arrow-down" />
-            </q-item-section>
-            <q-item-section> Archived</q-item-section>
-          </q-item>
+            </template>
+            <template v-else>
+              <q-expansion-item
+                :key="menu.keyWord"
+                :icon="menu.icon"
+                :label="menu.title"
+                default-opened
+                expand-separator
+              >
+                <q-list padding>
+                  <q-item
+                    v-for="childMenu in menu.children"
+                    :key="childMenu.keyWord"
+                    :active="childMenu.keyWord === selectedMenu"
+                    class="q-pl-md"
+                    clickable
+                    @click="selectedMenu = childMenu.keyWord"
+                  >
+                    <q-item-section v-if="childMenu.icon" avatar>
+                      <q-icon :name="childMenu.icon" />
+                    </q-item-section>
+                    <q-item-section>{{ childMenu.title }}</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-expansion-item>
+            </template>
+          </template>
         </q-list>
       </q-scroll-area>
 
@@ -61,21 +60,72 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <trips />
     </q-page-container>
   </q-layout>
 </template>
 
 <script lang="ts">
+import Trips from 'pages/Trips.vue';
 import { defineComponent, ref } from 'vue';
+
+interface Menus {
+  title: string;
+  icon?: string;
+  keyWord: string;
+  children?: Menus[];
+}
 
 export default defineComponent({
   name: 'MainLayout',
-
+  components: { Trips },
   setup() {
+    const selectedMenu = ref('all');
     const miniState = ref(false);
-
+    const menus: Menus[] = [
+      {
+        title: 'New trip',
+        icon: 'mdi-plus',
+        keyWord: 'new',
+      },
+      {
+        title: 'All trips',
+        icon: 'mdi-format-list-bulleted',
+        keyWord: 'all',
+      },
+      {
+        title: 'Starred',
+        icon: 'mdi-star-outline',
+        keyWord: 'starred',
+      },
+      {
+        title: 'Filter by date',
+        icon: 'mdi-filter-variant',
+        keyWord: 'date',
+        children: [
+          {
+            title: 'Upcoming',
+            keyWord: 'future',
+          },
+          {
+            title: 'Currently Traveling',
+            keyWord: 'current',
+          },
+          {
+            title: 'Past',
+            keyWord: 'past',
+          },
+        ],
+      },
+      {
+        title: 'Archived',
+        icon: 'mdi-archive-arrow-down',
+        keyWord: 'archived',
+      },
+    ];
     return {
+      menus,
+      selectedMenu,
       miniState,
       drawerClick(e: Event) {
         if (miniState.value) {

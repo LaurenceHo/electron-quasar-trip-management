@@ -11,6 +11,7 @@ export interface TripModel extends Base {
   name?: string;
   destination: string;
   archived?: boolean;
+  starred?: boolean;
   tripDay?: TripDayModel[];
 }
 

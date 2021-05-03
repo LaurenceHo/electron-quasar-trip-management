@@ -16,6 +16,7 @@
               <q-item
                 :key="menu.keyWord"
                 :active="menu.keyWord === selectedMenu"
+                active-class="bg-primary text-white"
                 clickable
                 @click="selectedMenu = menu.keyWord"
               >
@@ -38,7 +39,8 @@
                     v-for="childMenu in menu.children"
                     :key="childMenu.keyWord"
                     :active="childMenu.keyWord === selectedMenu"
-                    class="q-pl-md"
+                    active-class="bg-primary text-white"
+                    class="q-pl-xl"
                     clickable
                     @click="selectedMenu = childMenu.keyWord"
                   >
@@ -55,12 +57,12 @@
       </q-scroll-area>
 
       <div class="q-mini-drawer-hide absolute" style="top: 15px; right: -17px">
-        <q-btn color="secondary" dense icon="mdi-chevron-left" round unelevated @click="miniState = true" />
+        <q-btn color="accent" dense icon="mdi-chevron-left" round unelevated @click="miniState = true" />
       </div>
     </q-drawer>
 
     <q-page-container>
-      <trips />
+      <trips :filter="selectedMenu" />
     </q-page-container>
   </q-layout>
 </template>

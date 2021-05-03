@@ -2,7 +2,13 @@ import { JSONSchemaType } from 'ajv';
 
 /** Ref: https://ajv.js.org/guide/typescript.html **/
 
-export interface Trip {
+export interface Base {
+  _id?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Trip extends Base {
   timezoneId: string;
   startDate: Date;
   endDate: Date;
@@ -12,13 +18,13 @@ export interface Trip {
   starred?: boolean;
 }
 
-export interface TripDay {
+export interface TripDay extends Base {
   tripId: string;
   name?: string;
   tripDate: Date;
 }
 
-export interface Event {
+export interface Event extends Base {
   tripDayId: string;
   categoryId: string;
   startTimeTimezoneId?: string;
@@ -42,6 +48,9 @@ export interface Category {
 export const TripSchema: JSONSchemaType<Trip> = {
   type: 'object',
   properties: {
+    _id: { type: 'string', nullable: true },
+    createdAt: { type: 'object', format: 'custom-date-time', nullable: true, required: [] },
+    updatedAt: { type: 'object', format: 'custom-date-time', nullable: true, required: [] },
     timezoneId: { type: 'string' },
     startDate: { type: 'object', format: 'custom-date-time', required: [] },
     endDate: { type: 'object', format: 'custom-date-time', required: [] },
@@ -57,6 +66,9 @@ export const TripSchema: JSONSchemaType<Trip> = {
 export const TripDaySchema: JSONSchemaType<TripDay> = {
   type: 'object',
   properties: {
+    _id: { type: 'string', nullable: true },
+    createdAt: { type: 'object', format: 'custom-date-time', nullable: true, required: [] },
+    updatedAt: { type: 'object', format: 'custom-date-time', nullable: true, required: [] },
     tripId: { type: 'string' },
     name: { type: 'string', nullable: true },
     tripDate: { type: 'object', format: 'custom-date-time', required: [] },
@@ -68,6 +80,9 @@ export const TripDaySchema: JSONSchemaType<TripDay> = {
 export const EventSchema: JSONSchemaType<Event> = {
   type: 'object',
   properties: {
+    _id: { type: 'string', nullable: true },
+    createdAt: { type: 'object', format: 'custom-date-time', nullable: true, required: [] },
+    updatedAt: { type: 'object', format: 'custom-date-time', nullable: true, required: [] },
     tripDayId: { type: 'string' },
     categoryId: { type: 'string' },
     startTimeTimezoneId: { type: 'string', nullable: true },

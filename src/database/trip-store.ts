@@ -17,11 +17,11 @@ export default class TripStore extends BaseStore<Trip> {
   }
 
   findByStarred() {
-    return this.databaseInstance.find({ starred: true });
+    return this.databaseInstance.find({ starred: true }).sort({ startDate: -1 });
   }
 
   findByArchived() {
-    return this.databaseInstance.find({ archived: true });
+    return this.databaseInstance.find({ archived: true }).sort({ startDate: -1 });
   }
 
   findAll() {

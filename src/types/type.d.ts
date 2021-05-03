@@ -1,29 +1,39 @@
-import { TripModel, TripDayModel, EventModel } from 'src/types/models';
+import { EventModel, TripDayModel, TripModel } from 'src/types/models';
 
 type Nullable<T> = T | null;
 
-export interface TripApi {
-  createTrip(trip: TripModel): Promise<void>;
-  updateTrip(tripId: string, trip: TripModel): Promise<void>;
+export interface TripService {
+  createTrip(trip: TripModel): Promise<TripModel>;
+
+  updateTrip(tripId: string, trip: TripModel): Promise<number>;
+
   findAllTrips(): Promise<TripModel[]>;
+
   findTripsByStarred(): Promise<TripModel[]>;
+
   findTripsByArchived(): Promise<TripModel[]>;
+
   findTripsByTime(param: 'future' | 'current' | 'past'): Promise<TripModel[]>;
 }
-interface TripDayApi {
-  createTripDay(tripDay: TripDayModel): Promise<void>;
-  updateTripDay(tripDayId: string, tripDay: TripDayModel): Promise<void>;
+
+interface TripDayService {
+  createTripDay(tripDay: TripDayModel): Promise<TripDayModel>;
+
+  updateTripDay(tripDayId: string, tripDay: TripDayModel): Promise<number>;
+
+  deleteTripDay(tripDayId: string): Promise<number>;
+
   findTripDaysByTrip(tripId: string): Promise<TripDayModel[]>;
 }
-interface EventApi {
-  createEvent(event: EventModel): Promise<void>;
-  updateEvent(eventId: string, event: EventModel): Promise<void>;
-  findEventsByTripDay(tripDayId: string): Promise<EventModel[]>;
-  findEventsByCategory(categoryId: string): Promise<EventModel[]>;
-}
 
-declare interface Window {
-  tripApi: TripApi;
-  tripDayApi: TripDayApi;
-  eventApi: EventApi;
+interface EventService {
+  createEvent(event: EventModel): Promise<EventModel>;
+
+  updateEvent(eventId: string, event: EventModel): Promise<number>;
+
+  deleteEvent(eventId: string): Promise<number>;
+
+  findEventsByTripDay(tripDayId: string): Promise<EventModel[]>;
+
+  findEventsByCategory(categoryId: string): Promise<EventModel[]>;
 }

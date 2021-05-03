@@ -1,8 +1,4 @@
-export interface Base {
-  _id?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { Base } from 'src/database/schemas';
 
 export interface TripModel extends Base {
   timezoneId: string;

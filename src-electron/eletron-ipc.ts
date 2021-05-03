@@ -1,70 +1,78 @@
 import electron from 'electron';
-import EventStore from '../src/database/event-store';
-import { EventSchema, TripDaySchema, TripSchema } from '../src/database/schemas';
-import TripDayStore from '../src/database/trip-day-store';
-import TripStore from '../src/database/trip-store';
+import EventService from '../src/services/event-service';
+import TripDayService from '../src/services/trip-day-service';
+import TripService from '../src/services/trip-service';
+import { TripDayModel, TripModel } from '../src/types/models';
 
 export const enableIPC = () => {
   const ipcMain = electron.ipcMain;
-  const tripStore = new TripStore('trip.db', TripSchema);
-  const tripDayStore = new TripDayStore('trip_day.db', TripDaySchema);
-  const eventStore = new EventStore('event.db', EventSchema);
+  const tripService = new TripService();
+  const tripDayService = new TripDayService();
+  const eventService = new EventService();
 
   /*** Trip store ***/
-  ipcMain.handle('createTrip', async (event, param) => {
-    return await tripStore.create(param);
+  ipcMain.handle('createTrip', async (event, param: TripModel) => {
+    return await tripService.createTrip(param);
   });
 
   ipcMain.handle('updateTrip', async (event, ...param) => {
     // @ts-ignore
-    return await tripStore.update(...param);
+    return await tripService.updateTrip(...param);
   });
 
   ipcMain.handle('findAllTrips', async () => {
-    return tripStore.findAll();
+    return await tripService.findAllTrips();
   });
 
   ipcMain.handle('findTripsByStarred', async () => {
-    return tripStore.findByStarred();
+    return await tripService.findTripsByStarred();
   });
 
   ipcMain.handle('findTripsByArchived', async () => {
-    return tripStore.findByArchived();
+    return await tripService.findTripsByArchived();
   });
 
   ipcMain.handle('findTripsByTime', async (event, param: 'future' | 'current' | 'past') => {
-    return tripStore.findByTime(param);
+    return await tripService.findTripsByTime(param);
   });
 
   /*** TripDay store ***/
-  ipcMain.handle('createTripDay', async (event, param) => {
-    return await tripDayStore.create(param);
+  ipcMain.handle('createTripDay', async (event, param: TripDayModel) => {
+    return await tripDayService.createTripDay(param);
   });
 
   ipcMain.handle('updateTripDay', async (event, ...param) => {
     // @ts-ignore
-    return await tripDayStore.update(...param);
+    return await tripDayService.updateTripDay(...param);
   });
 
-  ipcMain.handle('findTripDaysByTrip', async (event, param: string) => {
-    return tripDayStore.findByTrip(param);
+  ipcMain.handle('deleteTripDay', async (event, tripDayId: string) => {
+    return await tripDayService.deleteTripDay(tripDayId);
+  });
+
+  ipcMain.handle('findTripDaysByTrip', async (event, tripId: string) => {
+    return await tripDayService.findTripDaysByTrip(tripId);
   });
 
   /*** Event store ***/
   ipcMain.handle('createEvent', async (event, param) => {
-    return await eventStore.create(param);
+    return await eventService.createEvent(param);
   });
 
   ipcMain.handle('updateEvent', async (event, ...param) => {
     // @ts-ignore
-    return await eventStore.update(...param);
+    return await eventService.updateEvent(...param);
+  });
+
+  ipcMain.handle('deleteEvent', async (event, eventId: string) => {
+    return await eventService.deleteEvent(eventId);
   });
 
   ipcMain.handle('findEventsByTripDay', async (event, tripDayId: string) => {
-    return eventStore.findByTripDay(tripDayId);
+    return await eventService.findEventsByTripDay(tripDayId);
   });
 
   ipcMain.handle('findEventsByCategory', async (event, categoryId: string) => {
-    return eventStore.findByCategory(categoryId);
+    return await eventService.findEventsByCategory(categoryId);
   });
 };

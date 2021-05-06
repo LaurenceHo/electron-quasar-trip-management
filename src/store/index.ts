@@ -18,7 +18,8 @@ import { StoreState } from './types';
  */
 
 const state: StoreState = {
-  filter: 'all',
+  miniDrawer: false,
+  timezone: [],
 };
 
 // provide typings for `this.$store`

@@ -1,5 +1,10 @@
 import { Base } from 'src/database/schemas';
 
+export interface Option {
+  label: string;
+  value: string;
+}
+
 export interface TripModel extends Base {
   timezoneId: string;
   startDate: string;

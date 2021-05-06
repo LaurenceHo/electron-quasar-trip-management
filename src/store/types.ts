@@ -1,25 +1,29 @@
+import { Option } from 'src/types/models';
 import { ActionContext, CommitOptions, DispatchOptions, Store as VuexStore } from 'vuex';
 
-type Filter = 'all' | 'starred' | 'future' | 'current' | 'past' | 'archived';
-
 export interface StoreState {
-  filter: Filter;
+  miniDrawer: boolean;
+  timezone: Option[];
 }
 
 export enum ActionType {
-  setFilter = 'setFilter',
+  setMiniDrawer = 'setMiniDrawer',
+  initialTimezone = 'initialTimezone',
 }
 
 export type Actions = {
-  [ActionType.setFilter](context: ActionAugments, filter: Filter): void;
+  [ActionType.setMiniDrawer](context: ActionAugments, miniDrawer: boolean): void;
+  [ActionType.initialTimezone](context: ActionAugments): void;
 };
 
 export enum MutationType {
-  setFilter = 'setFilter',
+  setMiniDrawer = 'setMiniDrawer',
+  setTimezone = 'setTimezone',
 }
 
 export type Mutations = {
-  [MutationType.setFilter](state: StoreState, filter: Filter): void;
+  [MutationType.setMiniDrawer](state: StoreState, miniDrawer: boolean): void;
+  [MutationType.setTimezone](state: StoreState, timezone: Option[]): void;
 };
 
 export type ActionAugments = Omit<ActionContext<StoreState, StoreState>, 'commit'> & {

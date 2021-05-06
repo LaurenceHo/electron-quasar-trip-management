@@ -2,15 +2,15 @@
   <q-layout style="background: #fff" view="hHh lpR fFf">
     <q-drawer
       :breakpoint="500"
-      :mini="miniState"
+      :mini="store.state.miniDrawer"
       :width="250"
       bordered
-      class="bg-grey-3"
+      class="bg-grey-3 app-drawer"
       show-if-above
       @click.capture="drawerClick"
     >
       <q-scroll-area class="fit">
-        <q-list padding>
+        <q-list>
           <template v-for="menu in menus">
             <template v-if="!menu.children">
               <q-item
@@ -56,20 +56,30 @@
         </q-list>
       </q-scroll-area>
 
-      <div class="q-mini-drawer-hide absolute" style="top: 15px; right: -17px">
-        <q-btn color="accent" dense icon="mdi-chevron-left" round unelevated @click="miniState = true" />
+      <div class="q-mini-drawer-hide absolute" style="top: 15px; right: -12px">
+        <q-btn
+          class="app-drawer-button"
+          color="accent"
+          dense
+          icon="mdi-chevron-left"
+          round
+          size="sm"
+          unelevated
+          @click="closeDrawer"
+        />
       </div>
     </q-drawer>
-
     <q-page-container>
-      <trips :filter="selectedMenu" />
+      <trips :filter="selectedMenu" :isCreateTrip="isCreateTrip" @closeDialog="closeDialog" />
     </q-page-container>
   </q-layout>
 </template>
 
 <script lang="ts">
 import Trips from 'pages/Trips.vue';
-import { defineComponent, ref } from 'vue';
+import { useStore } from 'src/store';
+import { ActionType } from 'src/store/types';
+import { defineComponent, ref, watch, onMounted } from 'vue';
 
 interface Menus {
   title: string;
@@ -82,8 +92,9 @@ export default defineComponent({
   name: 'MainLayout',
   components: { Trips },
   setup() {
+    const store = useStore();
     const selectedMenu = ref('all');
-    const miniState = ref(false);
+    const isCreateTrip = ref(false);
     const menus: Menus[] = [
       {
         title: 'New trip',
@@ -97,7 +108,7 @@ export default defineComponent({
       },
       {
         title: 'Starred',
-        icon: 'mdi-star-outline',
+        icon: 'mdi-star',
         keyWord: 'starred',
       },
       {
@@ -125,17 +136,45 @@ export default defineComponent({
         keyWord: 'archived',
       },
     ];
+    watch(selectedMenu, (selectedMenu) => {
+      if (selectedMenu === 'new') {
+        isCreateTrip.value = true;
+      }
+    });
+    onMounted(() => store.dispatch(ActionType.initialTimezone));
+
     return {
+      store,
       menus,
       selectedMenu,
-      miniState,
+      isCreateTrip,
+      closeDrawer() {
+        store.dispatch(ActionType.setMiniDrawer, true);
+      },
       drawerClick(e: Event) {
-        if (miniState.value) {
-          miniState.value = false;
+        if (store.state.miniDrawer) {
+          store.dispatch(ActionType.setMiniDrawer, false);
           e.stopPropagation();
         }
+      },
+      closeDialog() {
+        isCreateTrip.value = false;
+        selectedMenu.value = 'all';
       },
     };
   },
 });
 </script>
+<style scoped lang="scss">
+.app-drawer {
+  .app-drawer-button {
+    opacity: 0;
+    transition: all 0.5s ease-out;
+  }
+  &:hover {
+    .app-drawer-button {
+      opacity: 100;
+    }
+  }
+}
+</style>

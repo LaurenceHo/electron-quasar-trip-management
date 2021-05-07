@@ -5,6 +5,12 @@ export interface Option {
   value: string;
 }
 
+export interface OpenedForm {
+  type: null | 'trip' | 'tripDay' | 'event';
+  mode: null | 'edit' | 'create';
+  selectedId: null | 'string';
+}
+
 export interface TripModel extends Base {
   timezoneId: string;
   startDate: string;

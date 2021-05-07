@@ -1,14 +1,9 @@
-import { DateTime } from 'luxon';
 import { Trip, TripSchema } from '../database/schemas';
 import TripStore from '../database/trip-store';
 import { TripModel } from '../types/models';
 import { TripService as ITripService } from '../types/type';
 
 const tripStore = new TripStore('trip.db', TripSchema);
-
-const dateTimeFormat = (dateTime: string): string => {
-  return dateTime ? DateTime.fromISO(dateTime).toLocaleString() : '-';
-};
 
 const parseTripModel = (item: TripModel): Trip => {
   const trip: Trip = { destination: '', endDate: new Date(), startDate: new Date(), timezoneId: '' };
@@ -31,25 +26,29 @@ const parseTrip = (item: Trip): TripModel => {
   tripModel._id = item._id;
   tripModel.name = item.name;
   tripModel.destination = item.destination;
-  tripModel.startDate = dateTimeFormat(item.startDate.toISOString());
-  tripModel.endDate = dateTimeFormat(item.endDate.toISOString());
+  tripModel.startDate = item.startDate.toISOString();
+  tripModel.endDate = item.endDate.toISOString();
   tripModel.archived = item.archived;
   tripModel.starred = item.starred;
   tripModel.timezoneId = item.timezoneId;
-  tripModel.tripDay = [];
   return tripModel;
 };
 
 export default class TripService implements ITripService {
-  async createTrip(item: TripModel): Promise<TripModel> {
+  async create(item: TripModel): Promise<TripModel> {
     const trip = parseTripModel(item);
     const newTrip = (await tripStore.create(trip)) as Trip;
     return parseTrip(newTrip);
   }
 
-  async updateTrip(_id: string, item: TripModel): Promise<number> {
+  async update(tripId: string, item: TripModel): Promise<number> {
     const trip = parseTripModel(item);
-    return (await tripStore.update(_id, trip)) as number;
+    return (await tripStore.update(tripId, trip)) as number;
+  }
+
+  async findOneById(id: string): Promise<TripModel> {
+    const trip = (await tripStore.findOneById(id)) as Trip;
+    return parseTrip(trip);
   }
 
   async findAllTrips(): Promise<TripModel[]> {

@@ -9,4 +9,8 @@ export const mutations: MutationTree<StoreState> & Mutations = {
   [MutationType.setTimezone](state: StoreState, payload): void {
     state.timezone = payload;
   },
+
+  [MutationType.setOpenedForm](state: StoreState, payload): void {
+    state.openedForm = payload;
+  },
 };

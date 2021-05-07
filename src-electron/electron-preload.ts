@@ -5,8 +5,9 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { Event, Trip, TripDay } from 'src/database/schemas';
 
 contextBridge.exposeInMainWorld('TripService', {
-  createTrip: async (data: Trip) => await ipcRenderer.invoke('createTrip', data),
-  updateTrip: async (tripId: string, data: Trip) => await ipcRenderer.invoke('updateTrip', tripId, data),
+  create: async (data: Trip) => await ipcRenderer.invoke('createTrip', data),
+  update: async (tripId: string, data: Trip) => await ipcRenderer.invoke('updateTrip', tripId, data),
+  findOneById: async (tripId: string) => await ipcRenderer.invoke('findTripById', tripId),
   findAllTrips: async () => await ipcRenderer.invoke('findAllTrips'),
   findTripsByStarred: async () => await ipcRenderer.invoke('findTripsByStarred'),
   findTripsByArchived: async () => await ipcRenderer.invoke('findTripsByArchived'),
@@ -14,16 +15,18 @@ contextBridge.exposeInMainWorld('TripService', {
 });
 
 contextBridge.exposeInMainWorld('TripDayService', {
-  createTripDay: async (data: TripDay) => await ipcRenderer.invoke('createTripDay', data),
-  updateTripDay: async (tripDayId: string, data: TripDay) => await ipcRenderer.invoke('updateTripDay', tripDayId, data),
-  deleteTripDay: async (tripDayId: string) => await ipcRenderer.invoke('deleteTripDay', tripDayId),
+  create: async (data: TripDay) => await ipcRenderer.invoke('createTripDay', data),
+  update: async (tripDayId: string, data: TripDay) => await ipcRenderer.invoke('updateTripDay', tripDayId, data),
+  delete: async (tripDayId: string) => await ipcRenderer.invoke('deleteTripDay', tripDayId),
+  findOneById: async (tripDayId: string) => await ipcRenderer.invoke('findTripDayById', tripDayId),
   findTripDaysByTrip: async (param: string) => await ipcRenderer.invoke('findTripDaysByTrip', param),
 });
 
 contextBridge.exposeInMainWorld('EventService', {
-  creatEvent: async (data: Event) => await ipcRenderer.invoke('createEvent', data),
-  updateEvent: async (eventId: string, data: Event) => await ipcRenderer.invoke('updateEvent', eventId, data),
-  deleteEvent: async (eventId: string) => await ipcRenderer.invoke('deleteEvent', eventId),
+  creat: async (data: Event) => await ipcRenderer.invoke('createEvent', data),
+  update: async (eventId: string, data: Event) => await ipcRenderer.invoke('updateEvent', eventId, data),
+  delete: async (eventId: string) => await ipcRenderer.invoke('deleteEvent', eventId),
+  findOneById: async (eventId: string) => await ipcRenderer.invoke('findEventById', eventId),
   findEventsByTripDay: async (param: string) => await ipcRenderer.invoke('findEventsByTripDay', param),
   findEventsByCategory: async (param: string) => await ipcRenderer.invoke('findEventsByCategory', param),
 });

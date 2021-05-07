@@ -70,16 +70,17 @@
       </div>
     </q-drawer>
     <q-page-container>
-      <trips :filter="selectedMenu" :isCreateTrip="isCreateTrip" @closeDialog="closeDialog" />
+      <dashboard :filter="selectedMenu" />
     </q-page-container>
   </q-layout>
 </template>
 
 <script lang="ts">
-import Trips from 'pages/Trips.vue';
+import Dashboard from 'pages/Dashboard.vue';
 import { useStore } from 'src/store';
 import { ActionType } from 'src/store/types';
-import { defineComponent, ref, watch, onMounted } from 'vue';
+import { OpenedForm } from 'src/types/models';
+import { defineComponent, ref, watch, onMounted, computed } from 'vue';
 
 interface Menus {
   title: string;
@@ -90,11 +91,10 @@ interface Menus {
 
 export default defineComponent({
   name: 'MainLayout',
-  components: { Trips },
+  components: { Dashboard },
   setup() {
     const store = useStore();
     const selectedMenu = ref('all');
-    const isCreateTrip = ref(false);
     const menus: Menus[] = [
       {
         title: 'New trip',
@@ -136,18 +136,26 @@ export default defineComponent({
         keyWord: 'archived',
       },
     ];
+    const openedForm = computed(() => store.state.openedForm);
+
     watch(selectedMenu, (selectedMenu) => {
       if (selectedMenu === 'new') {
-        isCreateTrip.value = true;
+        store.dispatch(ActionType.setOpenedForm, { type: 'trip', mode: 'create', selectedId: null });
       }
     });
+
+    watch(openedForm, (openedForm: OpenedForm) => {
+      if (openedForm && !openedForm.type && !openedForm.mode) {
+        selectedMenu.value = 'all';
+      }
+    });
+
     onMounted(() => store.dispatch(ActionType.initialTimezone));
 
     return {
       store,
       menus,
       selectedMenu,
-      isCreateTrip,
       closeDrawer() {
         store.dispatch(ActionType.setMiniDrawer, true);
       },
@@ -156,10 +164,6 @@ export default defineComponent({
           store.dispatch(ActionType.setMiniDrawer, false);
           e.stopPropagation();
         }
-      },
-      closeDialog() {
-        isCreateTrip.value = false;
-        selectedMenu.value = 'all';
       },
     };
   },

@@ -5,9 +5,6 @@ import { actions } from './actions';
 import { mutations } from './mutations';
 import { StoreState } from './types';
 
-// import example from './module-example'
-// import { ExampleStateInterface } from './module-example/state';
-
 /*
  * If not building with SSR mode, you can
  * directly export the Store instantiation;
@@ -20,6 +17,11 @@ import { StoreState } from './types';
 const state: StoreState = {
   miniDrawer: false,
   timezone: [],
+  openedForm: {
+    type: null,
+    mode: null,
+    selectedId: null,
+  },
 };
 
 // provide typings for `this.$store`

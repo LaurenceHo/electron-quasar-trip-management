@@ -1,29 +1,34 @@
-import { Option } from 'src/types/models';
+import { OpenedForm, Option } from 'src/types/models';
 import { ActionContext, CommitOptions, DispatchOptions, Store as VuexStore } from 'vuex';
 
 export interface StoreState {
   miniDrawer: boolean;
   timezone: Option[];
+  openedForm: OpenedForm;
 }
 
 export enum ActionType {
   setMiniDrawer = 'setMiniDrawer',
   initialTimezone = 'initialTimezone',
+  setOpenedForm = 'setOpenedForm',
 }
 
 export type Actions = {
   [ActionType.setMiniDrawer](context: ActionAugments, miniDrawer: boolean): void;
   [ActionType.initialTimezone](context: ActionAugments): void;
+  [ActionType.setOpenedForm](context: ActionAugments, payload: OpenedForm): void;
 };
 
 export enum MutationType {
   setMiniDrawer = 'setMiniDrawer',
   setTimezone = 'setTimezone',
+  setOpenedForm = 'setOpenedForm',
 }
 
 export type Mutations = {
   [MutationType.setMiniDrawer](state: StoreState, miniDrawer: boolean): void;
   [MutationType.setTimezone](state: StoreState, timezone: Option[]): void;
+  [MutationType.setOpenedForm](state: StoreState, payload: OpenedForm): void;
 };
 
 export type ActionAugments = Omit<ActionContext<StoreState, StoreState>, 'commit'> & {

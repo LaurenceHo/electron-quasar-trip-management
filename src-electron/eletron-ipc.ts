@@ -2,7 +2,7 @@ import electron from 'electron';
 import EventService from '../src/services/event-service';
 import TripDayService from '../src/services/trip-day-service';
 import TripService from '../src/services/trip-service';
-import { TripDayModel, TripModel } from '../src/types/models';
+import { EventModel, TripDayModel, TripModel } from '../src/types/models';
 
 export const enableIPC = () => {
   const ipcMain = electron.ipcMain;
@@ -12,12 +12,15 @@ export const enableIPC = () => {
 
   /*** Trip store ***/
   ipcMain.handle('createTrip', async (event, param: TripModel) => {
-    return await tripService.createTrip(param);
+    return await tripService.create(param);
   });
 
-  ipcMain.handle('updateTrip', async (event, ...param) => {
-    // @ts-ignore
-    return await tripService.updateTrip(...param);
+  ipcMain.handle('updateTrip', async (event, tripId: string, tripModel: TripModel) => {
+    return await tripService.update(tripId, tripModel);
+  });
+
+  ipcMain.handle('findTripById', async (event, tripId: string) => {
+    return await tripService.findOneById(tripId);
   });
 
   ipcMain.handle('findAllTrips', async () => {
@@ -38,16 +41,19 @@ export const enableIPC = () => {
 
   /*** TripDay store ***/
   ipcMain.handle('createTripDay', async (event, param: TripDayModel) => {
-    return await tripDayService.createTripDay(param);
+    return await tripDayService.create(param);
   });
 
-  ipcMain.handle('updateTripDay', async (event, ...param) => {
-    // @ts-ignore
-    return await tripDayService.updateTripDay(...param);
+  ipcMain.handle('updateTripDay', async (event, tripDayId: string, param: TripDayModel) => {
+    return await tripDayService.update(tripDayId, param);
   });
 
   ipcMain.handle('deleteTripDay', async (event, tripDayId: string) => {
-    return await tripDayService.deleteTripDay(tripDayId);
+    return await tripDayService.delete(tripDayId);
+  });
+
+  ipcMain.handle('findTripDayById', async (event, tripDayId: string) => {
+    return await tripDayService.findOneById(tripDayId);
   });
 
   ipcMain.handle('findTripDaysByTrip', async (event, tripId: string) => {
@@ -56,16 +62,19 @@ export const enableIPC = () => {
 
   /*** Event store ***/
   ipcMain.handle('createEvent', async (event, param) => {
-    return await eventService.createEvent(param);
+    return await eventService.create(param);
   });
 
-  ipcMain.handle('updateEvent', async (event, ...param) => {
-    // @ts-ignore
-    return await eventService.updateEvent(...param);
+  ipcMain.handle('updateEvent', async (event, eventId: string, param: EventModel) => {
+    return await eventService.update(eventId, param);
   });
 
   ipcMain.handle('deleteEvent', async (event, eventId: string) => {
-    return await eventService.deleteEvent(eventId);
+    return await eventService.delete(eventId);
+  });
+
+  ipcMain.handle('findEventById', async (event, eventId: string) => {
+    return await eventService.findOneById(eventId);
   });
 
   ipcMain.handle('findEventsByTripDay', async (event, tripDayId: string) => {

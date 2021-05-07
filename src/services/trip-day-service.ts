@@ -10,17 +10,22 @@ const dateTimeFormat = (dateTime: string): string => {
   return dateTime ? DateTime.fromISO(dateTime).toLocaleString() : '-';
 };
 
+// TODO
 export default class TripDayService implements ITripDayService {
-  createTripDay(tripDay: TripDayModel): Promise<TripDayModel> {
+  create(tripDay: TripDayModel): Promise<TripDayModel> {
     return Promise.resolve({} as any);
   }
 
-  updateTripDay(tripDayId: string, tripDay: TripDayModel): Promise<number> {
+  update(tripDayId: string, tripDay: TripDayModel): Promise<number> {
     return Promise.resolve(0);
   }
 
-  deleteTripDay(tripDayId: string): Promise<number> {
+  delete(tripDayId: string): Promise<number> {
     return Promise.resolve(0);
+  }
+
+  findOneById(tripId: string): Promise<TripDayModel> {
+    return Promise.resolve({} as TripDayModel);
   }
 
   findTripDaysByTrip(tripId: string): Promise<TripDayModel[]> {

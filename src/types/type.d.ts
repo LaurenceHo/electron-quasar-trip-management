@@ -2,11 +2,17 @@ import { EventModel, TripDayModel, TripModel } from 'src/types/models';
 
 type Nullable<T> = T | null;
 
-export interface TripService {
-  createTrip(trip: TripModel): Promise<TripModel>;
+export interface BaseService<T> {
+  create(data: T): Promise<T>;
 
-  updateTrip(tripId: string, trip: TripModel): Promise<number>;
+  update(id: string, data: T): Promise<number>;
 
+  delete?(id: string): Promise<number>;
+
+  findOneById(id: string): Promise<T>;
+}
+
+export interface TripService extends BaseService<TripModel>{
   findAllTrips(): Promise<TripModel[]>;
 
   findTripsByStarred(): Promise<TripModel[]>;
@@ -16,23 +22,11 @@ export interface TripService {
   findTripsByTime(param: 'future' | 'current' | 'past'): Promise<TripModel[]>;
 }
 
-interface TripDayService {
-  createTripDay(tripDay: TripDayModel): Promise<TripDayModel>;
-
-  updateTripDay(tripDayId: string, tripDay: TripDayModel): Promise<number>;
-
-  deleteTripDay(tripDayId: string): Promise<number>;
-
+interface TripDayService extends BaseService<TripDayModel>{
   findTripDaysByTrip(tripId: string): Promise<TripDayModel[]>;
 }
 
-interface EventService {
-  createEvent(event: EventModel): Promise<EventModel>;
-
-  updateEvent(eventId: string, event: EventModel): Promise<number>;
-
-  deleteEvent(eventId: string): Promise<number>;
-
+interface EventService extends BaseService<EventModel>{
   findEventsByTripDay(tripDayId: string): Promise<EventModel[]>;
 
   findEventsByCategory(categoryId: string): Promise<EventModel[]>;

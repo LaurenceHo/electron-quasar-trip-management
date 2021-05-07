@@ -5,24 +5,29 @@ import { EventService as IEventService } from '../types/type';
 
 const eventStore = new EventStore('event.db', EventSchema);
 
+// TODO
 export default class EventService implements IEventService {
-  createEvent(event: EventModel): Promise<EventModel> {
+  async create(event: EventModel): Promise<EventModel> {
     return Promise.resolve({} as any);
   }
 
-  updateEvent(eventId: string, event: EventModel): Promise<number> {
+  async update(eventId: string, event: EventModel): Promise<number> {
     return Promise.resolve(0);
   }
 
-  deleteEvent(eventId: string): Promise<number> {
+  async delete(eventId: string): Promise<number> {
     return Promise.resolve(0);
   }
 
-  findEventsByCategory(categoryId: string): Promise<EventModel[]> {
+  async findOneById(eventId: string): Promise<EventModel> {
+    return Promise.resolve({} as EventModel);
+  }
+
+  async findEventsByCategory(categoryId: string): Promise<EventModel[]> {
     return Promise.resolve([]);
   }
 
-  findEventsByTripDay(tripDayId: string): Promise<EventModel[]> {
+  async findEventsByTripDay(tripDayId: string): Promise<EventModel[]> {
     return Promise.resolve([]);
   }
 }

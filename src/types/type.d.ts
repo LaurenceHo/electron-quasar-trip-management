@@ -12,7 +12,7 @@ export interface BaseService<T> {
   findOneById(id: string): Promise<T>;
 }
 
-export interface TripService extends BaseService<TripModel>{
+export interface TripService extends BaseService<TripModel> {
   findAllTrips(): Promise<TripModel[]>;
 
   findTripsByStarred(): Promise<TripModel[]>;
@@ -22,11 +22,11 @@ export interface TripService extends BaseService<TripModel>{
   findTripsByTime(param: 'future' | 'current' | 'past'): Promise<TripModel[]>;
 }
 
-interface TripDayService extends BaseService<TripDayModel>{
+interface TripDayService extends BaseService<TripDayModel> {
   findTripDaysByTrip(tripId: string): Promise<TripDayModel[]>;
 }
 
-interface EventService extends BaseService<EventModel>{
+interface EventService extends BaseService<EventModel> {
   findEventsByTripDay(tripDayId: string): Promise<EventModel[]>;
 
   findEventsByCategory(categoryId: string): Promise<EventModel[]>;

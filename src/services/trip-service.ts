@@ -52,22 +52,22 @@ export default class TripService implements ITripService {
   }
 
   async findAllTrips(): Promise<TripModel[]> {
-    let trips = (await tripStore.findAll()) as Trip[];
+    const trips = (await tripStore.findAll()) as Trip[];
     return trips.map((trip) => parseTrip(trip));
   }
 
   async findTripsByStarred(): Promise<TripModel[]> {
-    let trips = (await tripStore.findByStarred()) as Trip[];
+    const trips = (await tripStore.findByStarred()) as Trip[];
     return trips.map((trip) => parseTrip(trip));
   }
 
   async findTripsByArchived(): Promise<TripModel[]> {
-    let trips = (await tripStore.findByArchived()) as Trip[];
+    const trips = (await tripStore.findByArchived()) as Trip[];
     return trips.map((trip) => parseTrip(trip));
   }
 
   async findTripsByTime(keyword: 'future' | 'current' | 'past'): Promise<TripModel[]> {
-    let trips = (await tripStore.findByTime(keyword)) as Trip[];
+    const trips = (await tripStore.findByTime(keyword)) as Trip[];
     return trips.map((trip) => parseTrip(trip));
   }
 }

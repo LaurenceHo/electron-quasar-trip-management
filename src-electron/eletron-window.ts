@@ -5,19 +5,17 @@ export const createWindow = async (): Promise<BrowserWindow> => {
   /**
    * Initial window options
    */
-  let mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 1500,
     height: 900,
     useContentSize: true,
     webPreferences: {
       contextIsolation: true,
       // More info: /quasar-cli/developing-electron-apps/electron-preload-script
-      // @ts-ignore
-      preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
+      preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD as string),
     },
   });
-  // @ts-ignore
-  await mainWindow.loadURL(process.env.APP_URL);
+  await mainWindow.loadURL(process.env.APP_URL as string);
 
   if (process.env.DEBUGGING) {
     // if on DEV or Production with debug enabled

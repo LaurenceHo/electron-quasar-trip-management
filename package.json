@@ -41,7 +41,7 @@
     "prettier": "^2.3.0"
   },
   "lint-staged": {
-    "*.{js,ts,vue}": [
+    "*.{js,ts,vue,scss}": [
       "eslint --fix",
       "prettier --write",
       "git add"

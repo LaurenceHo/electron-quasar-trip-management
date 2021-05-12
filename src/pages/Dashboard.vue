@@ -3,43 +3,19 @@
     <div v-if="isLoading">
       <q-spinner-facebook color="primary" size="2em" />
     </div>
-    <div v-else class="q-pt-md" style="width: 100%">
-      <q-expansion-item v-for="trip in trips" :key="trip._id">
-        <template v-slot:header>
-          <q-item-section side>
-            <div class="row items-center">
-              <q-icon
-                :color="`${trip.starred ? 'primary' : ''}`"
-                :name="`mdi-star${trip.starred ? '' : '-outline'}`"
-                size="sm"
-                @click="updateStarred(trip)"
-              />
-              <q-icon
-                :color="`${trip.archived ? 'primary' : ''}`"
-                :name="`mdi-archive-arrow-down${trip.archived ? '' : '-outline'}`"
-                size="sm"
-                @click="updateArchived(trip)"
-              />
-            </div>
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>
-              {{ localDateTimeFormat(trip.startDate) }} ~ {{ localDateTimeFormat(trip.endDate) }}
-            </q-item-label>
-            <q-item-label caption lines="2">{{ trip.name }}</q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-item-label caption>{{ trip.destination }}</q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-icon name="mdi-pencil" size="sm" @click="editTrip(trip._id)" />
-          </q-item-section>
-        </template>
-
-        <q-card>
-          <q-card-section> TODO</q-card-section>
-        </q-card>
-      </q-expansion-item>
+    <div v-else style="width: 100%">
+      <div class="row">
+        <div class="col">
+          <trip-list :trips="trips" @selectTrip="selectTrip" />
+        </div>
+        <div v-if="selectedTrip" class="col">
+          <q-list>
+            <q-item clickable>
+              <q-item-section>Single line item</q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+      </div>
     </div>
     <trip-form />
   </q-page>
@@ -47,9 +23,9 @@
 
 <script lang="ts">
 import TripForm from 'components/TripForm.vue';
+import TripList from 'components/TripList.vue';
 import { Notify } from 'quasar';
 import { Messages } from 'src/constants/messages';
-import { localDateTimeFormat } from 'src/helper';
 import { ActionType } from 'src/store/types';
 import { OpenedForm, TripModel } from 'src/types/models';
 import { TripService } from 'src/types/type';
@@ -57,7 +33,7 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'Dashboard',
-  components: { TripForm },
+  components: { TripList, TripForm },
   props: {
     filter: {
       type: String,
@@ -69,12 +45,12 @@ export default defineComponent({
     const tripService: TripService = (window as any).TripService;
     const trips: TripModel[] = [];
     const messages = Messages;
-
     return {
       isLoading: false,
       tripService,
       trips,
       messages,
+      selectedTrip: '',
     };
   },
 
@@ -83,10 +59,6 @@ export default defineComponent({
   },
 
   computed: {
-    localDateTimeFormat() {
-      return localDateTimeFormat;
-    },
-
     openedForm(): OpenedForm {
       return this.$store.state.openedForm;
     },
@@ -127,16 +99,12 @@ export default defineComponent({
       }
     },
 
-    async editTrip(tripId: string) {
-      await this.$store.dispatch(ActionType.setOpenedForm, { type: 'trip', mode: 'edit', selectedId: tripId });
-    },
-
-    async updateStarred(tripModel: TripModel) {
-      //TODO
-    },
-
-    async updateArchived(tripModel: TripModel) {
-      //TODO
+    selectTrip(tripId: string) {
+      if (tripId) {
+        console.log(tripId);
+        this.selectedTrip = tripId;
+        this.$store.dispatch(ActionType.setMiniDrawer, true);
+      }
     },
   },
 });

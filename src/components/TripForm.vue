@@ -7,22 +7,44 @@
         <q-btn v-close-popup dense flat icon="mdi-close" round @click="isDialogOpen = false" />
       </q-card-section>
       <q-card-section>
-        <div>
+        <form @submit.prevent.stop="onSubmit">
           <q-input v-model="tripModel.name" autofocus class="q-pb-lg" dense label="Trip name" outlined />
           <div class="row q-col-gutter-md q-pb-lg">
-            <q-input v-model="tripModel.destination" class="col" dense label="Destination" outlined />
+            <q-input
+              ref="destinationRef"
+              v-model="tripModel.destination"
+              :rules="[(val) => (val && val.length > 0) || 'Destination is required']"
+              class="col"
+              dense
+              hint="This field is required"
+              label="Destination"
+              outlined
+            />
             <q-select
+              ref="timezoneRef"
               v-model="tripModel.timezoneId"
               :options="timezoneList"
+              :rules="[(val) => (val && val.length > 0) || 'Timezone is required']"
               class="col"
               dense
               emit-value
+              hint="This field is required"
               label="Timezone"
               map-options
               outlined
             />
           </div>
-          <q-input v-model="dateRangeDisplay" class="q-pb-lg" dense label="Trip date" outlined readonly>
+          <q-input
+            ref="dateRangeRef"
+            v-model="dateRangeDisplay"
+            :rules="[(val) => (val && val.length > 0) || 'Date range is required']"
+            class="q-pb-lg"
+            dense
+            hint="This field is required"
+            label="Trip date"
+            outlined
+            readonly
+          >
             <template v-slot:append>
               <q-icon class="cursor-pointer" name="mdi-calendar-month-outline">
                 <q-popup-proxy ref="qDateProxy" transition-hide="scale" transition-show="scale">
@@ -35,12 +57,11 @@
               </q-icon>
             </template>
           </q-input>
-        </div>
+        </form>
       </q-card-section>
-
       <q-card-actions align="right" class="text-primary">
         <q-btn v-close-popup flat label="Cancel" />
-        <q-btn v-close-popup :label="openedForm.mode === 'create' ? 'Create' : 'Update'" flat @click="submit" />
+        <q-btn :label="openedForm.mode === 'create' ? 'Create' : 'Update'" flat type="submit" @click="onSubmit" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -68,16 +89,12 @@ export default defineComponent({
       endDate: '',
       destination: '',
     };
-    const isDialogOpen = false;
-    const dateRange = { from: '', to: '' };
-    const messages = Messages;
-
     return {
       tripService,
-      isDialogOpen,
-      dateRange,
+      isDialogOpen: false,
+      dateRange: { from: '', to: '' },
       tripModel,
-      messages,
+      messages: Messages,
     };
   },
 
@@ -101,14 +118,7 @@ export default defineComponent({
   watch: {
     async isDialogOpen(value: boolean) {
       if (!value) {
-        this.tripModel = {
-          timezoneId: '',
-          name: '',
-          startDate: '',
-          endDate: '',
-          destination: '',
-        };
-        this.dateRange = { from: '', to: '' };
+        this.resetForm();
         await this.$store.dispatch(ActionType.setOpenedForm, { type: null, mode: null, selectedId: null });
       }
     },
@@ -149,20 +159,40 @@ export default defineComponent({
   },
 
   methods: {
-    async submit(e: Event) {
+    async onSubmit(e: Event) {
       e.preventDefault();
-      try {
-        if (this.openedForm.mode === 'edit' && this.tripModel._id) {
-          await this.tripService.update(this.tripModel._id, JSON.parse(JSON.stringify(this.tripModel)));
-        } else if (this.openedForm.mode === 'create') {
-          await this.tripService.create(JSON.parse(JSON.stringify(this.tripModel)));
+      const destinationRef = this.$refs.destinationRef as any;
+      destinationRef.validate();
+      const dateRangeRef = this.$refs.dateRangeRef as any;
+      dateRangeRef.validate();
+      const timezoneRef = this.$refs.timezoneRef as any;
+      timezoneRef.validate();
+      if (!destinationRef.hasError && !dateRangeRef.hasError && !timezoneRef.hasError) {
+        try {
+          if (this.openedForm.mode === 'edit' && this.tripModel._id) {
+            await this.tripService.update(this.tripModel._id, JSON.parse(JSON.stringify(this.tripModel)));
+          } else if (this.openedForm.mode === 'create') {
+            await this.tripService.create(JSON.parse(JSON.stringify(this.tripModel)));
+          }
+          this.isDialogOpen = false;
+        } catch (error) {
+          Notify.create({
+            message: `${error}`,
+            color: 'negative',
+          });
         }
-      } catch (error) {
-        Notify.create({
-          message: `${error}`,
-          color: 'negative',
-        });
       }
+    },
+
+    resetForm() {
+      this.tripModel = {
+        timezoneId: '',
+        name: '',
+        startDate: '',
+        endDate: '',
+        destination: '',
+      };
+      this.dateRange = { from: '', to: '' };
     },
   },
 });

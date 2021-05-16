@@ -5,23 +5,30 @@
     </div>
     <div v-else style="width: 100%">
       <div class="row">
-        <div class="col">
+        <div
+          :class="[
+            selectedTrip.length > 0 && selectedTripDay.length === 0
+              ? 'col-8'
+              : selectedTrip > 0 && selectedTripDay > 0
+              ? 'col-4'
+              : 'col',
+          ]"
+        >
           <trip-list :trips="trips" @selectTrip="selectTrip" />
         </div>
-        <div v-if="selectedTrip" class="col">
-          <q-list>
-            <q-item clickable>
-              <q-item-section>Single line item</q-item-section>
-            </q-item>
-          </q-list>
+        <div v-if="selectedTrip" class="col-4">
+          <trip-day-list />
         </div>
       </div>
     </div>
     <trip-form />
+    <trip-day-form />
   </q-page>
 </template>
 
 <script lang="ts">
+import TripDayForm from 'components/TripDayForm.vue';
+import TripDayList from 'components/TripDayList.vue';
 import TripForm from 'components/TripForm.vue';
 import TripList from 'components/TripList.vue';
 import { Notify } from 'quasar';
@@ -33,7 +40,7 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'Dashboard',
-  components: { TripList, TripForm },
+  components: { TripDayForm, TripDayList, TripList, TripForm },
   props: {
     filter: {
       type: String,
@@ -51,6 +58,7 @@ export default defineComponent({
       trips,
       messages,
       selectedTrip: '',
+      selectedTripDay: '',
     };
   },
 

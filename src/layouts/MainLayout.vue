@@ -12,46 +12,44 @@
       <q-scroll-area class="fit">
         <q-list>
           <template v-for="menu in menus">
-            <template v-if="!menu.children">
-              <q-item
-                :key="menu.keyWord"
-                :active="menu.keyWord === selectedMenu"
-                active-class="bg-primary text-white"
-                clickable
-                @click="selectedMenu = menu.keyWord"
-              >
-                <q-item-section v-if="menu.icon" avatar>
-                  <q-icon :name="menu.icon" />
-                </q-item-section>
-                <q-item-section>{{ menu.title }}</q-item-section>
-              </q-item>
-            </template>
-            <template v-else>
-              <q-expansion-item
-                :key="menu.keyWord"
-                :icon="menu.icon"
-                :label="menu.title"
-                default-opened
-                expand-separator
-              >
-                <q-list padding>
-                  <q-item
-                    v-for="childMenu in menu.children"
-                    :key="childMenu.keyWord"
-                    :active="childMenu.keyWord === selectedMenu"
-                    active-class="bg-primary text-white"
-                    class="q-pl-xl"
-                    clickable
-                    @click="selectedMenu = childMenu.keyWord"
-                  >
-                    <q-item-section v-if="childMenu.icon" avatar>
-                      <q-icon :name="childMenu.icon" />
-                    </q-item-section>
-                    <q-item-section>{{ childMenu.title }}</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-expansion-item>
-            </template>
+            <q-item
+              v-if="!menu.children"
+              :key="menu.keyWord"
+              :active="menu.keyWord === selectedMenu"
+              active-class="bg-primary text-white"
+              clickable
+              @click="selectedMenu = menu.keyWord"
+            >
+              <q-item-section v-if="menu.icon" avatar>
+                <q-icon :name="menu.icon" />
+              </q-item-section>
+              <q-item-section>{{ menu.title }}</q-item-section>
+            </q-item>
+            <q-expansion-item
+              v-else
+              :key="menu.keyWord"
+              :icon="menu.icon"
+              :label="menu.title"
+              default-opened
+              expand-separator
+            >
+              <q-list padding>
+                <q-item
+                  v-for="childMenu in menu.children"
+                  :key="childMenu.keyWord"
+                  :active="childMenu.keyWord === selectedMenu"
+                  active-class="bg-primary text-white"
+                  class="q-pl-xl"
+                  clickable
+                  @click="selectedMenu = childMenu.keyWord"
+                >
+                  <q-item-section v-if="childMenu.icon" avatar>
+                    <q-icon :name="childMenu.icon" />
+                  </q-item-section>
+                  <q-item-section>{{ childMenu.title }}</q-item-section>
+                </q-item>
+              </q-list>
+            </q-expansion-item>
           </template>
         </q-list>
       </q-scroll-area>
@@ -144,8 +142,8 @@ export default defineComponent({
       }
     });
 
-    watch(openedForm, (openedForm: OpenedForm) => {
-      if (openedForm && !openedForm.type && !openedForm.mode) {
+    watch(openedForm, (openedForm: OpenedForm, previous: OpenedForm) => {
+      if (previous.mode === 'create' && openedForm && !openedForm.type && !openedForm.mode) {
         selectedMenu.value = 'all';
       }
     });

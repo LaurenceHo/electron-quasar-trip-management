@@ -25,6 +25,8 @@ export default class TripStore extends BaseStore<Trip> {
   }
 
   findAll() {
-    return this.databaseInstance.find({}).sort({ startDate: -1 });
+    return this.databaseInstance
+      .find({ $and: [{ startDate: { $ne: null } }, { endDate: { $ne: null } }] })
+      .sort({ startDate: -1 });
   }
 }

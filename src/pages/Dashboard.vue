@@ -7,27 +7,25 @@
       <div class="row">
         <div
           :class="[
-            selectedTrip.length > 0 && selectedTripDay.length === 0
+            selectedTrip._id && selectedTripDayId.length === 0
               ? 'col-8'
-              : selectedTrip > 0 && selectedTripDay > 0
+              : selectedTrip._id > 0 && selectedTripDayId > 0
               ? 'col-4'
               : 'col',
           ]"
         >
           <trip-list :trips="trips" @selectTrip="selectTrip" />
         </div>
-        <div v-if="selectedTrip" class="col-4">
-          <trip-day-list />
+        <div v-if="selectedTrip._id" class="col-4">
+          <trip-day-list :selected-trip="selectedTrip" />
         </div>
       </div>
     </div>
     <trip-form />
-    <trip-day-form />
   </q-page>
 </template>
 
 <script lang="ts">
-import TripDayForm from 'components/TripDayForm.vue';
 import TripDayList from 'components/TripDayList.vue';
 import TripForm from 'components/TripForm.vue';
 import TripList from 'components/TripList.vue';
@@ -40,7 +38,7 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'Dashboard',
-  components: { TripDayForm, TripDayList, TripList, TripForm },
+  components: { TripDayList, TripList, TripForm },
   props: {
     filter: {
       type: String,
@@ -51,14 +49,21 @@ export default defineComponent({
   data() {
     const tripService: TripService = (window as any).TripService;
     const trips: TripModel[] = [];
-    const messages = Messages;
+    const selectedTrip: TripModel = {
+      timezoneId: '',
+      name: '',
+      startDate: '',
+      endDate: '',
+      destination: '',
+    };
+
     return {
       isLoading: false,
       tripService,
       trips,
-      messages,
-      selectedTrip: '',
-      selectedTripDay: '',
+      messages: Messages,
+      selectedTrip,
+      selectedTripDayId: '',
     };
   },
 
@@ -107,10 +112,9 @@ export default defineComponent({
       }
     },
 
-    selectTrip(tripId: string) {
-      if (tripId) {
-        console.log(tripId);
-        this.selectedTrip = tripId;
+    selectTrip(trip: TripModel) {
+      if (trip._id) {
+        this.selectedTrip = trip;
         this.$store.dispatch(ActionType.setMiniDrawer, true);
       }
     },

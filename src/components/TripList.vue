@@ -3,7 +3,7 @@
     <q-item
       v-for="trip in trips"
       :key="trip._id"
-      :active="trip._id === selectedTrip"
+      :active="trip._id === selectedTrip._id"
       active-class="bg-teal-1 text-grey-8"
       clickable
     >
@@ -27,7 +27,7 @@
           />
         </div>
       </q-item-section>
-      <q-item-section @click="selectTrip(trip._id)">
+      <q-item-section @click="selectTrip(trip)">
         <q-item-label>
           {{ localDateTimeFormat(trip.startDate) }} ~ {{ localDateTimeFormat(trip.endDate) }}
         </q-item-label>
@@ -64,30 +64,35 @@ export default defineComponent({
 
   data() {
     const tripService: TripService = (window as any).TripService;
-    const selectedTrip = '';
-    const messages = Messages;
+    const selectedTrip: TripModel = {
+      timezoneId: '',
+      name: '',
+      startDate: '',
+      endDate: '',
+      destination: '',
+    };
 
     return {
       selectedTrip,
       tripService,
-      messages,
+      messages: Messages,
     };
   },
 
   computed: {
-    localDateTimeFormat() {
-      return localDateTimeFormat;
-    },
-
     openedForm(): OpenedForm {
       return this.$store.state.openedForm;
     },
   },
 
   methods: {
-    selectTrip(tripId: string) {
-      this.selectedTrip = tripId;
-      this.$emit('selectTrip', tripId);
+    localDateTimeFormat(dateTime: string) {
+      return localDateTimeFormat(dateTime);
+    },
+
+    selectTrip(trip: TripModel) {
+      this.selectedTrip = trip;
+      this.$emit('selectTrip', trip);
     },
 
     async editTrip(tripId: string) {

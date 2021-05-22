@@ -6,12 +6,11 @@
         <q-space />
         <q-btn v-close-popup dense flat icon="mdi-close" round @click="isDialogOpen = false" />
       </q-card-section>
-      <q-card-section>
-        <form @submit.prevent.stop="onSubmit">
+      <q-form @submit="onSubmit">
+        <q-card-section>
           <q-input v-model="tripModel.name" autofocus class="q-pb-lg" dense label="Trip name" outlined />
           <div class="row q-col-gutter-md q-pb-lg">
             <q-input
-              ref="destinationRef"
               v-model="tripModel.destination"
               :rules="[(val) => (val && val.length > 0) || 'Destination is required']"
               class="col"
@@ -21,7 +20,6 @@
               outlined
             />
             <q-select
-              ref="timezoneRef"
               v-model="tripModel.timezoneId"
               :options="timezoneList"
               :rules="[(val) => (val && val.length > 0) || 'Timezone is required']"
@@ -35,7 +33,6 @@
             />
           </div>
           <q-input
-            ref="dateRangeRef"
             v-model="dateRangeDisplay"
             :rules="[(val) => (val && val.length > 0) || 'Date range is required']"
             class="q-pb-lg"
@@ -57,12 +54,12 @@
               </q-icon>
             </template>
           </q-input>
-        </form>
-      </q-card-section>
-      <q-card-actions align="right" class="text-primary">
-        <q-btn v-close-popup flat label="Cancel" />
-        <q-btn :label="openedForm.mode === 'create' ? 'Create' : 'Update'" flat type="submit" @click="onSubmit" />
-      </q-card-actions>
+        </q-card-section>
+        <q-card-actions align="right" class="text-primary">
+          <q-btn v-close-popup flat label="Cancel" />
+          <q-btn :label="openedForm.mode === 'create' ? 'Create' : 'Update'" flat type="submit" />
+        </q-card-actions>
+      </q-form>
     </q-card>
   </q-dialog>
 </template>
@@ -103,6 +100,7 @@ export default defineComponent({
       return this.$store.state.openedForm;
     },
 
+    // Only for display, do nothing else
     dateRangeDisplay(): string {
       if (!isEmpty(this.dateRange) && !isEmpty(this.dateRange.from) && !isEmpty(this.dateRange.to)) {
         return `${localDateTimeFormat(this.dateRange.from)} ~ ${localDateTimeFormat(this.dateRange.to)}`;
@@ -119,7 +117,7 @@ export default defineComponent({
     async isDialogOpen(value: boolean) {
       if (!value) {
         this.resetForm();
-        await this.$store.dispatch(ActionType.setOpenedForm, { type: null, mode: null, selectedId: null });
+        await this.$store.dispatch(ActionType.closeForm);
       }
     },
 
@@ -127,19 +125,20 @@ export default defineComponent({
       try {
         if (openedForm.type === 'trip') {
           this.isDialogOpen = true;
-        }
-        if (openedForm.mode === 'edit') {
-          if (openedForm.selectedId) {
-            this.tripModel = await this.tripService.findOneById(openedForm.selectedId);
-            this.dateRange = {
-              from: this.tripModel.startDate,
-              to: this.tripModel.endDate,
-            };
-          } else {
-            Notify.create({
-              message: this.messages.incorrectTripId,
-              color: 'negative',
-            });
+
+          if (openedForm.mode === 'edit') {
+            if (openedForm.selectedId) {
+              this.tripModel = await this.tripService.findOneById(openedForm.selectedId);
+              this.dateRange = {
+                from: this.tripModel.startDate,
+                to: this.tripModel.endDate,
+              };
+            } else {
+              Notify.create({
+                message: this.messages.incorrectTripId,
+                color: 'negative',
+              });
+            }
           }
         }
       } catch (error) {
@@ -159,28 +158,19 @@ export default defineComponent({
   },
 
   methods: {
-    async onSubmit(e: Event) {
-      e.preventDefault();
-      const destinationRef = this.$refs.destinationRef as any;
-      destinationRef.validate();
-      const dateRangeRef = this.$refs.dateRangeRef as any;
-      dateRangeRef.validate();
-      const timezoneRef = this.$refs.timezoneRef as any;
-      timezoneRef.validate();
-      if (!destinationRef.hasError && !dateRangeRef.hasError && !timezoneRef.hasError) {
-        try {
-          if (this.openedForm.mode === 'edit' && this.tripModel._id) {
-            await this.tripService.update(this.tripModel._id, JSON.parse(JSON.stringify(this.tripModel)));
-          } else if (this.openedForm.mode === 'create') {
-            await this.tripService.create(JSON.parse(JSON.stringify(this.tripModel)));
-          }
-          this.isDialogOpen = false;
-        } catch (error) {
-          Notify.create({
-            message: `${error}`,
-            color: 'negative',
-          });
+    async onSubmit() {
+      try {
+        if (this.openedForm.mode === 'edit' && this.tripModel._id) {
+          await this.tripService.update(this.tripModel._id, JSON.parse(JSON.stringify(this.tripModel)));
+        } else if (this.openedForm.mode === 'create') {
+          await this.tripService.create(JSON.parse(JSON.stringify(this.tripModel)));
         }
+        this.isDialogOpen = false;
+      } catch (error) {
+        Notify.create({
+          message: `${error}`,
+          color: 'negative',
+        });
       }
     },
 

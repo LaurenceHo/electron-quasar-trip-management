@@ -13,4 +13,12 @@ export const mutations: MutationTree<StoreState> & Mutations = {
   [MutationType.setOpenedForm](state: StoreState, payload): void {
     state.openedForm = payload;
   },
+
+  [MutationType.closeForm](state: StoreState): void {
+    state.openedForm = {
+      mode: null,
+      type: null,
+      selectedId: null,
+    };
+  },
 };

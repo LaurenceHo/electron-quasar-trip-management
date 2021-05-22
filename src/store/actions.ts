@@ -16,4 +16,8 @@ export const actions: ActionTree<StoreState, StoreState> & Actions = {
   [ActionType.setOpenedForm]({ commit }, payload) {
     commit(MutationType.setOpenedForm, payload);
   },
+
+  [ActionType.closeForm]({ commit }) {
+    commit(MutationType.closeForm);
+  },
 };

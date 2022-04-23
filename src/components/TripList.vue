@@ -28,9 +28,7 @@
         </div>
       </q-item-section>
       <q-item-section @click="selectTrip(trip)">
-        <q-item-label>
-          {{ localDateTimeFormat(trip.startDate) }} ~ {{ localDateTimeFormat(trip.endDate) }}
-        </q-item-label>
+        <q-item-label> {{ dateTimeFormat(trip.startDate) }} ~ {{ dateTimeFormat(trip.endDate) }}</q-item-label>
         <q-item-label caption>{{ trip.name }}</q-item-label>
       </q-item-section>
       <q-item-section side>
@@ -43,85 +41,66 @@
   </q-list>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { Notify } from 'quasar';
+import { localDateTimeFormat } from 'src/components/helper';
 import { Messages } from 'src/constants/messages';
-import { localDateTimeFormat } from 'src/helper';
-import { ActionType } from 'src/store/types';
-import { OpenedForm, TripModel } from 'src/types/models';
+import { TripModel } from 'src/types/models';
 import { TripService } from 'src/types/type';
-import { defineComponent } from 'vue';
+import { appStore } from 'stores/app-store';
+import { ref } from 'vue';
 
-export default defineComponent({
-  name: 'TripList',
-
-  props: {
-    trips: {
-      type: Array,
-      required: true,
-    },
-  },
-
-  data() {
-    const tripService: TripService = (window as any).TripService;
-    const selectedTrip: TripModel = {
-      timezoneId: '',
-      name: '',
-      startDate: '',
-      endDate: '',
-      destination: '',
-    };
-
-    return {
-      selectedTrip,
-      tripService,
-      messages: Messages,
-    };
-  },
-
-  computed: {
-    openedForm(): OpenedForm {
-      return this.$store.state.openedForm;
-    },
-  },
-
-  methods: {
-    localDateTimeFormat(dateTime: string) {
-      return localDateTimeFormat(dateTime);
-    },
-
-    selectTrip(trip: TripModel) {
-      this.selectedTrip = trip;
-      this.$emit('selectTrip', trip);
-    },
-
-    async editTrip(tripId: string) {
-      await this.$store.dispatch(ActionType.setOpenedForm, { type: 'trip', mode: 'edit', selectedId: tripId });
-    },
-
-    async updateStarred(tripModel: TripModel) {
-      tripModel.starred = !tripModel.starred;
-      try {
-        await this.tripService.update(tripModel._id as string, JSON.parse(JSON.stringify(tripModel)));
-      } catch (error) {
-        Notify.create({
-          message: this.messages.dataStoreError,
-          color: 'negative',
-        });
-      }
-    },
-
-    async updateArchived(tripModel: TripModel) {
-      tripModel.archived = !tripModel.archived;
-      try {
-        await this.tripService.update(tripModel._id as string, JSON.parse(JSON.stringify(tripModel)));
-      } catch (error) {
-        Notify.create({
-          message: this.messages.dataStoreError,
-          color: 'negative',
-        });
-      }
-    },
+const emit = defineEmits(['selectTrip']);
+const props = defineProps({
+  trips: {
+    type: Array,
+    required: true,
+    default: () => [],
   },
 });
+
+const messages = Messages;
+const tripService: TripService = (window as any).TripService;
+const store = appStore();
+
+const selectedTrip = ref({
+  timezoneId: '',
+  name: '',
+  startDate: '',
+  endDate: '',
+  destination: '',
+} as TripModel);
+
+const dateTimeFormat = (dateTime: string) => localDateTimeFormat(dateTime);
+
+const selectTrip = (trip: TripModel) => {
+  selectedTrip.value = trip;
+  emit('selectTrip', trip);
+};
+
+const editTrip = (tripId: string) => store.setOpenedForm({ type: 'trip', mode: 'edit', selectedId: tripId as any });
+
+const updateStarred = async (tripModel: TripModel) => {
+  tripModel.starred = !tripModel.starred;
+  try {
+    await tripService.update(tripModel._id as string, JSON.parse(JSON.stringify(tripModel)));
+  } catch (error) {
+    Notify.create({
+      message: messages.dataStoreError,
+      color: 'negative',
+    });
+  }
+};
+
+const updateArchived = async (tripModel: TripModel) => {
+  tripModel.archived = !tripModel.archived;
+  try {
+    await tripService.update(tripModel._id as string, JSON.parse(JSON.stringify(tripModel)));
+  } catch (error) {
+    Notify.create({
+      message: messages.dataStoreError,
+      color: 'negative',
+    });
+  }
+};
 </script>

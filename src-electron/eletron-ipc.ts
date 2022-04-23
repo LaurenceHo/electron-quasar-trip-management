@@ -1,4 +1,4 @@
-import electron from 'electron';
+import * as electron from 'electron';
 import EventService from '../src/services/event-service';
 import TripDayService from '../src/services/trip-day-service';
 import TripService from '../src/services/trip-service';

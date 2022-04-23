@@ -2,7 +2,7 @@
   <q-layout style="background: #fff" view="hHh lpR fFf">
     <q-drawer
       :breakpoint="500"
-      :mini="store.state.miniDrawer"
+      :mini="miniDrawer"
       :width="250"
       bordered
       class="bg-grey-3 app-drawer"
@@ -73,12 +73,11 @@
   </q-layout>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import Dashboard from 'pages/Dashboard.vue';
-import { useStore } from 'src/store';
-import { ActionType } from 'src/store/types';
 import { OpenedForm } from 'src/types/models';
-import { defineComponent, ref, watch, onMounted, computed } from 'vue';
+import { appStore } from 'stores/app-store';
+import { computed, onMounted, ref, watch } from 'vue';
 
 interface Menus {
   title: string;
@@ -87,84 +86,76 @@ interface Menus {
   children?: Menus[];
 }
 
-export default defineComponent({
-  name: 'MainLayout',
-  components: { Dashboard },
-  setup() {
-    const store = useStore();
-    const selectedMenu = ref('all');
-    const menus: Menus[] = [
-      {
-        title: 'New trip',
-        icon: 'mdi-plus',
-        keyWord: 'new',
-      },
-      {
-        title: 'All trips',
-        icon: 'mdi-format-list-bulleted',
-        keyWord: 'all',
-      },
-      {
-        title: 'Starred',
-        icon: 'mdi-star',
-        keyWord: 'starred',
-      },
-      {
-        title: 'Filter by date',
-        icon: 'mdi-filter-variant',
-        keyWord: 'date',
-        children: [
-          {
-            title: 'Upcoming',
-            keyWord: 'future',
-          },
-          {
-            title: 'Currently Traveling',
-            keyWord: 'current',
-          },
-          {
-            title: 'Past',
-            keyWord: 'past',
-          },
-        ],
-      },
-      {
-        title: 'Archived',
-        icon: 'mdi-archive-arrow-down',
-        keyWord: 'archived',
-      },
-    ];
-    const openedForm = computed(() => store.state.openedForm);
-
-    watch(selectedMenu, (selectedMenu) => {
-      if (selectedMenu === 'new') {
-        store.dispatch(ActionType.setOpenedForm, { type: 'trip', mode: 'create', selectedId: null });
-      }
-    });
-
-    watch(openedForm, (openedForm: OpenedForm, previous: OpenedForm) => {
-      if (previous.mode === 'create' && openedForm && !openedForm.type && !openedForm.mode) {
-        selectedMenu.value = 'all';
-      }
-    });
-
-    onMounted(() => store.dispatch(ActionType.initialTimezone));
-
-    return {
-      store,
-      menus,
-      selectedMenu,
-      closeDrawer() {
-        store.dispatch(ActionType.setMiniDrawer, true);
-      },
-      drawerClick(e: Event) {
-        if (store.state.miniDrawer) {
-          store.dispatch(ActionType.setMiniDrawer, false);
-          e.stopPropagation();
-        }
-      },
-    };
+const menus: Menus[] = [
+  {
+    title: 'New trip',
+    icon: 'mdi-plus',
+    keyWord: 'new',
   },
+  {
+    title: 'All trips',
+    icon: 'mdi-format-list-bulleted',
+    keyWord: 'all',
+  },
+  {
+    title: 'Starred',
+    icon: 'mdi-star',
+    keyWord: 'starred',
+  },
+  {
+    title: 'Filter by date',
+    icon: 'mdi-filter-variant',
+    keyWord: 'date',
+    children: [
+      {
+        title: 'Upcoming',
+        keyWord: 'future',
+      },
+      {
+        title: 'Currently Traveling',
+        keyWord: 'current',
+      },
+      {
+        title: 'Past',
+        keyWord: 'past',
+      },
+    ],
+  },
+  {
+    title: 'Archived',
+    icon: 'mdi-archive-arrow-down',
+    keyWord: 'archived',
+  },
+];
+
+const store = appStore();
+
+const selectedMenu = ref('all');
+
+const miniDrawer = computed(() => store.miniDrawer);
+const openedForm = computed(() => store.openedForm);
+
+const closeDrawer = () => store.setMiniDrawer(true);
+
+const drawerClick = (e: Event) => {
+  if (store.miniDrawer) {
+    store.setMiniDrawer(false);
+    e.stopPropagation();
+  }
+};
+
+onMounted(() => store.initialTimezone());
+
+watch(selectedMenu, (selectedMenu) => {
+  if (selectedMenu === 'new') {
+    store.setOpenedForm({ type: 'trip', mode: 'create', selectedId: null });
+  }
+});
+
+watch(openedForm, (openedForm: OpenedForm, previous: OpenedForm) => {
+  if (previous.mode === 'create' && openedForm && !openedForm.type && !openedForm.mode) {
+    selectedMenu.value = 'all';
+  }
 });
 </script>
 <style scoped lang="scss">
@@ -173,6 +164,7 @@ export default defineComponent({
     opacity: 0;
     transition: all 0.5s ease-out;
   }
+
   &:hover {
     .app-drawer-button {
       opacity: 100;

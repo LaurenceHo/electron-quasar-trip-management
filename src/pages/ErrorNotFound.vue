@@ -5,15 +5,9 @@
 
       <div class="text-h2" style="opacity: 0.4">Oops. Nothing here...</div>
 
-      <q-btn class="q-mt-xl" color="white" label="Go Home" no-caps text-color="blue" to="/" unelevated />
+      <q-btn class="q-mt-xl" color="white" text-color="blue" unelevated to="/" label="Go Home" no-caps />
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'Error404',
-});
-</script>
+<script lang="ts" setup></script>

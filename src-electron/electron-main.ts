@@ -1,28 +1,65 @@
-import { app, BrowserWindow } from 'electron';
-import { Nullable } from 'src/types/type';
+import { app, BrowserWindow, nativeTheme } from 'electron';
+import * as path from 'path';
+import * as os from 'os';
 import { enableIPC } from './eletron-ipc';
-import { createWindow } from './eletron-window';
 
-let window: Nullable<BrowserWindow> = null;
+// needed in case process is undefined under Linux
+const platform = process.platform || os.platform();
 
-app.allowRendererProcessReuse = true;
+try {
+  if (platform === 'win32' && nativeTheme.shouldUseDarkColors === true) {
+    require('fs').unlinkSync(path.join(app.getPath('userData'), 'DevTools Extensions'));
+  }
+} catch (_) {}
 
-app.on('ready', async () => {
+let mainWindow;
+
+function createWindow() {
+  /**
+   * Initial window options
+   */
+  mainWindow = new BrowserWindow({
+    icon: path.resolve(__dirname, 'icons/icon.png'), // tray icon
+    width: 1000,
+    height: 600,
+    useContentSize: true,
+    webPreferences: {
+      contextIsolation: true,
+      // More info: /quasar-cli/developing-electron-apps/electron-preload-script
+      preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
+    },
+  });
+
+  mainWindow.loadURL(process.env.APP_URL);
+
+  if (process.env.DEBUGGING) {
+    // if on DEV or Production with debug enabled
+    mainWindow.webContents.openDevTools();
+  } else {
+    // we're on production; no access to devtools pls
+    mainWindow.webContents.on('devtools-opened', () => {
+      mainWindow.webContents.closeDevTools();
+    });
+  }
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+}
+
+app.whenReady().then(() => {
+  createWindow();
   enableIPC();
-  window = await createWindow();
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  if (platform !== 'darwin') {
     app.quit();
   }
 });
 
-app.on('activate', async () => {
-  if (!window) {
-    window = await createWindow();
-    window.on('closed', () => {
-      window = null;
-    });
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow();
   }
 });

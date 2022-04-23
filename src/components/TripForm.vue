@@ -64,126 +64,108 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import isEmpty from 'lodash/isEmpty';
 import { Notify } from 'quasar';
+import { localDateTimeFormat } from 'src/components/helper';
 import { Messages } from 'src/constants/messages';
-import { ActionType } from 'src/store/types';
-import { OpenedForm, TripModel } from 'src/types/models';
+import { TripModel } from 'src/types/models';
 import { TripService } from 'src/types/type';
-import { defineComponent } from 'vue';
-import { localDateTimeFormat } from '../helper';
+import { appStore } from 'stores/app-store';
+import { computed, ref, watch } from 'vue';
 
-export default defineComponent({
-  name: 'TripForm',
+const messages = Messages;
+const tripService: TripService = (window as any).TripService;
+const store = appStore();
 
-  data() {
-    const tripService: TripService = (window as any).TripService;
-    const tripModel: TripModel = {
-      timezoneId: '',
-      name: '',
-      startDate: '',
-      endDate: '',
-      destination: '',
-    };
-    return {
-      tripService,
-      isDialogOpen: false,
-      dateRange: { from: '', to: '' },
-      tripModel,
-      messages: Messages,
-    };
-  },
+const isDialogOpen = ref(false);
+const dateRange = ref({ from: '', to: '' });
+const tripModel = ref({
+  timezoneId: '',
+  name: '',
+  startDate: '',
+  endDate: '',
+  destination: '',
+} as TripModel);
 
-  computed: {
-    openedForm(): OpenedForm {
-      return this.$store.state.openedForm;
-    },
-
-    // Only for display, do nothing else
-    dateRangeDisplay(): string {
-      if (!isEmpty(this.dateRange) && !isEmpty(this.dateRange.from) && !isEmpty(this.dateRange.to)) {
-        return `${localDateTimeFormat(this.dateRange.from)} ~ ${localDateTimeFormat(this.dateRange.to)}`;
-      }
-      return '';
-    },
-
-    timezoneList() {
-      return this.$store.state.timezone;
-    },
-  },
-
-  watch: {
-    async isDialogOpen(value: boolean) {
-      if (!value) {
-        this.resetForm();
-        await this.$store.dispatch(ActionType.closeForm);
-      }
-    },
-
-    async openedForm(openedForm: OpenedForm) {
-      try {
-        if (openedForm.type === 'trip') {
-          this.isDialogOpen = true;
-
-          if (openedForm.mode === 'edit') {
-            if (openedForm.selectedId) {
-              this.tripModel = await this.tripService.findOneById(openedForm.selectedId);
-              this.dateRange = {
-                from: this.tripModel.startDate,
-                to: this.tripModel.endDate,
-              };
-            } else {
-              Notify.create({
-                message: this.messages.incorrectTripId,
-                color: 'negative',
-              });
-            }
-          }
-        }
-      } catch (error) {
-        Notify.create({
-          message: this.messages.dataStoreError,
-          color: 'negative',
-        });
-      }
-    },
-
-    dateRange(value: { from: string; to: string }) {
-      if (!isEmpty(value)) {
-        this.tripModel.startDate = value.from;
-        this.tripModel.endDate = value.to;
-      }
-    },
-  },
-
-  methods: {
-    async onSubmit() {
-      try {
-        if (this.openedForm.mode === 'edit' && this.tripModel._id) {
-          await this.tripService.update(this.tripModel._id, JSON.parse(JSON.stringify(this.tripModel)));
-        } else if (this.openedForm.mode === 'create') {
-          await this.tripService.create(JSON.parse(JSON.stringify(this.tripModel)));
-        }
-        this.isDialogOpen = false;
-      } catch (error) {
-        Notify.create({
-          message: `${error}`,
-          color: 'negative',
-        });
-      }
-    },
-
-    resetForm() {
-      this.tripModel = {
-        timezoneId: '',
-        name: '',
-        startDate: '',
-        endDate: '',
-        destination: '',
-      };
-      this.dateRange = { from: '', to: '' };
-    },
-  },
+const openedForm = computed(() => store.openedForm);
+const timezoneList = computed(() => store.timezone);
+const dateRangeDisplay = computed(() => {
+  if (!isEmpty(dateRange.value) && !isEmpty(dateRange.value.from) && !isEmpty(dateRange.value.to)) {
+    return `${localDateTimeFormat(dateRange.value.from)} ~ ${localDateTimeFormat(dateRange.value.to)}`;
+  }
+  return '';
 });
+
+const onSubmit = async () => {
+  try {
+    if (openedForm.value.mode === 'edit' && tripModel.value._id) {
+      await tripService.update(tripModel.value._id, JSON.parse(JSON.stringify(tripModel.value)));
+    } else if (openedForm.value.mode === 'create') {
+      await tripService.create(JSON.parse(JSON.stringify(tripModel.value)));
+    }
+    isDialogOpen.value = false;
+  } catch (error) {
+    Notify.create({
+      message: `${error}`,
+      color: 'negative',
+    });
+  }
+};
+const resetForm = () => {
+  tripModel.value = {
+    timezoneId: '',
+    name: '',
+    startDate: '',
+    endDate: '',
+    destination: '',
+  };
+
+  dateRange.value = { from: '', to: '' };
+};
+
+watch(isDialogOpen, (newValue) => {
+  if (!newValue) {
+    resetForm();
+    store.closeForm();
+  }
+});
+
+watch(openedForm, async (newValue) => {
+  try {
+    if (newValue.type === 'trip') {
+      isDialogOpen.value = true;
+      if (newValue.mode === 'edit') {
+        if (openedForm.value.selectedId) {
+          tripModel.value = await tripService.findOneById(openedForm.value.selectedId);
+          dateRange.value = {
+            from: tripModel.value.startDate,
+            to: tripModel.value.endDate,
+          };
+        } else {
+          Notify.create({
+            message: messages.incorrectTripId,
+            color: 'negative',
+          });
+        }
+      }
+    }
+  } catch (error) {
+    Notify.create({
+      message: messages.dataStoreError,
+      color: 'negative',
+    });
+  }
+});
+
+watch(
+  dateRange,
+  (newValue) => {
+    if (!isEmpty(newValue)) {
+      tripModel.value.startDate = newValue.from;
+      tripModel.value.endDate = newValue.to;
+    }
+  },
+  { immediate: true, deep: true }
+);
 </script>

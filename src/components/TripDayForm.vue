@@ -39,107 +39,89 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import isEmpty from 'lodash/isEmpty';
 import { Notify } from 'quasar';
+import { localDateTimeFormat } from 'src/components/helper';
 import { Messages } from 'src/constants/messages';
-import { localDateTimeFormat } from 'src/helper';
-import { ActionType } from 'src/store/types';
 import { TripDayService } from 'src/types/type';
-import { defineComponent } from 'vue';
-import { OpenedForm, TripDayModel } from '../types/models';
+import { appStore } from 'stores/app-store';
+import { computed, ref, toRefs, watch } from 'vue';
+import { TripDayModel } from '../types/models';
 
-export default defineComponent({
-  name: 'TripDayForm',
-
-  props: {
-    selectedTrip: {
-      type: Object,
-      required: true,
-    },
+const props = defineProps({
+  selectedTrip: {
+    type: Object,
+    required: true,
   },
+});
 
-  data() {
-    const tripDayService: TripDayService = (window as any).TripDayService;
-    const tripDayModel: TripDayModel = {
-      tripId: '',
-      name: '',
-      tripDate: '',
-    };
+const { selectedTrip } = toRefs(props);
+const messages = Messages;
+const tripDayService: TripDayService = (window as any).TripDayService;
 
-    return {
-      tripDayService,
-      tripDayModel,
-      isDialogOpen: false,
-      messages: Messages,
-    };
-  },
+const tripDayModel = ref({
+  tripId: '',
+  name: '',
+  tripDate: '',
+} as TripDayModel);
 
-  computed: {
-    openedForm(): OpenedForm {
-      return this.$store.state.openedForm;
-    },
+const isDialogOpen = ref(false);
+const store = appStore();
 
-    // Only for display, do nothing else
-    selectedTripDay(): string {
-      if (!isEmpty(this.tripDayModel.tripDate)) {
-        return localDateTimeFormat(this.tripDayModel.tripDate);
+const openedForm = computed(() => store.openedForm);
+const selectedTripDay = computed(() => {
+  if (!isEmpty(tripDayModel.value.tripDate)) {
+    return localDateTimeFormat(tripDayModel.value.tripDate);
+  }
+  return '';
+});
+
+const submit = async () => {
+  try {
+    if (openedForm.value.mode === 'create') {
+      await tripDayService.create(JSON.parse(JSON.stringify(tripDayModel.value)));
+    } else if (openedForm.value.mode === 'edit' && tripDayModel.value._id) {
+      //TODO, edit trip day
+    }
+    isDialogOpen.value = false;
+  } catch (error) {
+    Notify.create({
+      message: `${error}`,
+      color: 'negative',
+    });
+  }
+};
+const resetForm = () => {
+  tripDayModel.value = {
+    tripId: '',
+    name: '',
+    tripDate: '',
+  };
+};
+
+watch(isDialogOpen, (newValue) => {
+  if (!newValue) {
+    resetForm();
+    store.closeForm();
+  }
+});
+
+watch(openedForm, (newValue) => {
+  try {
+    if (newValue.type === 'tripDay') {
+      isDialogOpen.value = true;
+      if (newValue.mode === 'create') {
+        tripDayModel.value.tripId = selectedTrip.value._id;
+      } else if (newValue.mode === 'edit') {
+        //TODO, edit trip day
       }
-      return '';
-    },
-  },
-
-  watch: {
-    async isDialogOpen(value: boolean) {
-      if (!value) {
-        this.resetForm();
-        await this.$store.dispatch(ActionType.closeForm);
-      }
-    },
-
-    async openedForm(openedForm: OpenedForm) {
-      try {
-        if (openedForm.type === 'tripDay') {
-          this.isDialogOpen = true;
-          if (openedForm.mode === 'create') {
-            this.tripDayModel.tripId = this.selectedTrip._id;
-          } else if (openedForm.mode === 'edit') {
-            //TODO
-          }
-        }
-      } catch (error) {
-        Notify.create({
-          message: this.messages.dataStoreError,
-          color: 'negative',
-        });
-      }
-    },
-  },
-
-  methods: {
-    async submit() {
-      try {
-        if (this.openedForm.mode === 'create') {
-          await this.tripDayService.create(JSON.parse(JSON.stringify(this.tripDayModel)));
-        } else if (this.openedForm.mode === 'edit' && this.tripDayModel._id) {
-          //TODO
-        }
-        this.isDialogOpen = false;
-      } catch (error) {
-        Notify.create({
-          message: `${error}`,
-          color: 'negative',
-        });
-      }
-    },
-
-    resetForm() {
-      this.tripDayModel = {
-        tripId: '',
-        name: '',
-        tripDate: '',
-      };
-    },
-  },
+    }
+  } catch (error) {
+    Notify.create({
+      message: messages.dataStoreError,
+      color: 'negative',
+    });
+  }
 });
 </script>

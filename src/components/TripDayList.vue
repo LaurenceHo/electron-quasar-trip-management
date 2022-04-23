@@ -15,7 +15,7 @@
     >
       <q-item-section @click="selectTripDay(tripDay._id)">
         <q-item-label>
-          {{ localDateTimeFormat(tripDay.tripDate) }}
+          {{ dateTimeFormat(tripDay.tripDate) }}
         </q-item-label>
         <q-item-label caption>{{ tripDay.name }}</q-item-label>
       </q-item-section>
@@ -30,93 +30,64 @@
   <trip-day-form :selected-trip="selectedTrip" />
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import TripDayForm from 'components/TripDayForm.vue';
-import { Messages } from 'src/constants/messages';
-import { localDateTimeFormat } from 'src/helper';
+import { localDateTimeFormat } from 'src/components/helper';
+import { TripDayModel } from 'src/types/models';
 import { TripDayService } from 'src/types/type';
-import { ActionType } from 'src/store/types';
-import { OpenedForm, TripDayModel, TripModel } from 'src/types/models';
-import { defineComponent } from 'vue';
+import { appStore } from 'stores/app-store';
+import { computed, onMounted, ref, toRefs, watch } from 'vue';
 
-export default defineComponent({
-  name: 'TripDayList',
-
-  components: {
-    TripDayForm,
+const props = defineProps({
+  selectedTrip: {
+    type: Object,
+    required: true,
   },
+});
 
-  props: {
-    selectedTrip: {
-      type: Object,
-      required: true,
-    },
-  },
+const { selectedTrip } = toRefs(props);
+const tripDayService: TripDayService = (window as any).TripDayService;
+const store = appStore();
 
-  data() {
-    const tripDayService: TripDayService = (window as any).TripDayService;
-    const tripDays: TripDayModel[] = [];
-    const messages = Messages;
-    const selectedTripDay = '';
+const tripDays = ref([] as TripDayModel[]);
+const selectedTripDay = ref('');
 
-    return {
-      tripDayService,
-      tripDays,
-      messages,
-      selectedTripDay,
-    };
-  },
+const openedForm = computed(() => store.openedForm);
 
-  async mounted() {
-    if (this.selectedTrip._id) {
-      this.tripDays = await this.tripDayService.findTripDaysByTrip(this.selectedTrip._id);
-    }
-  },
+const dateTimeFormat = (dateTime: string) => localDateTimeFormat(dateTime);
 
-  computed: {
-    openedForm(): OpenedForm {
-      return this.$store.state.openedForm;
-    },
-  },
+const selectTripDay = (tripDayId: string) => (selectedTripDay.value = tripDayId);
 
-  watch: {
-    async selectedTrip(trip: TripModel) {
-      if (trip._id) {
-        this.tripDays = await this.tripDayService.findTripDaysByTrip(trip._id);
-      }
-    },
+const editTripDay = (tripDayId: string) => {
+  // TODO
+};
 
-    async openedForm(openedForm: OpenedForm, prev: OpenedForm) {
-      if (prev.type === 'tripDay' && openedForm.type === null && openedForm.mode === null && this.selectedTrip._id) {
-        this.tripDays = await this.tripDayService.findTripDaysByTrip(this.selectedTrip._id);
-      }
-    },
-  },
+const deleteTripDay = (tripDayId: string) => {
+  // TODO
+};
 
-  methods: {
-    localDateTimeFormat(dateTime: string) {
-      return localDateTimeFormat(dateTime);
-    },
+const createTripDay = () =>
+  store.setOpenedForm({
+    type: 'tripDay',
+    mode: 'create',
+    selectedId: null,
+  });
 
-    selectTripDay(tripDayId: string) {
-      this.selectedTripDay = tripDayId;
-    },
+onMounted(async () => {
+  if (selectedTrip.value?._id) {
+    tripDays.value = await tripDayService.findTripDaysByTrip(selectedTrip.value._id);
+  }
+});
 
-    async createTripDay() {
-      await this.$store.dispatch(ActionType.setOpenedForm, {
-        type: 'tripDay',
-        mode: 'create',
-        selectedId: null,
-      });
-    },
+watch(selectedTrip, async (trip) => {
+  if (trip._id) {
+    tripDays.value = await tripDayService.findTripDaysByTrip(trip._id);
+  }
+});
 
-    async editTripDay(tripDayId: string) {
-      //TODO
-    },
-
-    async deleteTripDay(tripDayId: string) {
-      //TODO
-    },
-  },
+watch(openedForm, async (newValue, prevValue) => {
+  if (prevValue.type === 'tripDay' && newValue.type === null && newValue.mode === null && selectedTrip.value?._id) {
+    tripDays.value = await tripDayService.findTripDaysByTrip(selectedTrip.value._id);
+  }
 });
 </script>

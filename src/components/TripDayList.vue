@@ -58,20 +58,26 @@ const dateTimeFormat = (dateTime: string) => localDateTimeFormat(dateTime);
 
 const selectTripDay = (tripDayId: string) => (selectedTripDay.value = tripDayId);
 
-const editTripDay = (tripDayId: string) => {
-  // TODO
-};
-
-const deleteTripDay = (tripDayId: string) => {
-  // TODO
-};
-
 const createTripDay = () =>
   store.setOpenedForm({
     type: 'tripDay',
     mode: 'create',
     selectedId: null,
   });
+
+const editTripDay = (tripDayId: string) =>
+  store.setOpenedForm({
+    type: 'tripDay',
+    mode: 'edit',
+    selectedId: tripDayId,
+  });
+
+const deleteTripDay = async (tripDayId: string) => {
+  await (tripDayService as any).delete(tripDayId);
+  // Refresh trip day list
+  tripDays.value = await tripDayService.findTripDaysByTrip(selectedTrip.value._id);
+  // TODO, should open confirm modal
+};
 
 onMounted(async () => {
   if (selectedTrip.value?._id) {

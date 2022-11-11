@@ -144,7 +144,7 @@ watch(openedForm, async (newValue) => {
           };
         } else {
           Notify.create({
-            message: messages.incorrectTripId,
+            message: messages.incorrectId,
             color: 'negative',
           });
         }

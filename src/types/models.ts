@@ -8,7 +8,7 @@ export interface Option {
 export interface OpenedForm {
   type: null | 'trip' | 'tripDay' | 'event';
   mode: null | 'edit' | 'create';
-  selectedId: null | 'string';
+  selectedId: null | string;
 }
 
 export interface TripModel extends Base {

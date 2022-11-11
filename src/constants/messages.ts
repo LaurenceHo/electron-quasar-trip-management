@@ -1,4 +1,4 @@
 export const Messages = {
-  incorrectTripId: 'Please provide correct trip id.',
+  incorrectId: 'Please provide correct id.',
   dataStoreError: 'There is something wrong with your data, please try again.',
 };

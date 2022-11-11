@@ -1,4 +1,4 @@
-import { TripDay, TripDaySchema } from '../database/schemas';
+import { TripDay, TripDaySchema } from 'database/schemas';
 import TripDayStore from '../database/trip-day-store';
 import { TripDayModel } from '../types/models';
 import { TripDayService as ITripDayService } from '../types/type';

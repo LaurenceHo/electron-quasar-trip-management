@@ -10,7 +10,7 @@
         <q-card-section>
           <q-input v-model="tripDayModel.name" autofocus class="q-pb-lg" dense label="Trip name" outlined />
           <q-input
-            v-model="selectedTripDay"
+            v-model="selectedDateDisplay"
             :rules="[(val) => (val && val.length > 0) || 'This field is required']"
             dense
             label="Trip date"
@@ -20,7 +20,7 @@
             <template v-slot:append>
               <q-icon class="cursor-pointer" name="mdi-calendar-month-outline">
                 <q-popup-proxy ref="qDateProxy" transition-hide="scale" transition-show="scale">
-                  <q-date v-model="tripDayModel.tripDate" mask="YYYY-MM-DD">
+                  <q-date v-model="tripDayModel.tripDate" mask="YYYY-MM-DD" :options="calendarOptionsFn">
                     <div class="row items-center justify-end">
                       <q-btn v-close-popup color="primary" flat label="Close" />
                     </div>
@@ -48,6 +48,7 @@ import { TripDayService } from 'src/types/type';
 import { appStore } from 'stores/app-store';
 import { computed, ref, toRefs, watch } from 'vue';
 import { TripDayModel } from '../types/models';
+import { DateTime } from 'luxon';
 
 const props = defineProps({
   selectedTrip: {
@@ -70,19 +71,23 @@ const isDialogOpen = ref(false);
 const store = appStore();
 
 const openedForm = computed(() => store.openedForm);
-const selectedTripDay = computed(() => {
+const selectedDateDisplay = computed(() => {
   if (!isEmpty(tripDayModel.value.tripDate)) {
     return localDateTimeFormat(tripDayModel.value.tripDate);
   }
   return '';
 });
 
+const calendarOptionsFn = (selectedDate: any) =>
+  selectedDate >= DateTime.fromISO(selectedTrip.value.startDate).toFormat('yyyy/MM/dd') &&
+  selectedDate <= DateTime.fromISO(selectedTrip.value.endDate).toFormat('yyyy/MM/dd');
+
 const submit = async () => {
   try {
     if (openedForm.value.mode === 'create') {
       await tripDayService.create(JSON.parse(JSON.stringify(tripDayModel.value)));
     } else if (openedForm.value.mode === 'edit' && tripDayModel.value._id) {
-      //TODO, edit trip day
+      await tripDayService.update(tripDayModel.value._id, JSON.parse(JSON.stringify(tripDayModel.value)));
     }
     isDialogOpen.value = false;
   } catch (error) {
@@ -92,6 +97,7 @@ const submit = async () => {
     });
   }
 };
+
 const resetForm = () => {
   tripDayModel.value = {
     tripId: '',
@@ -107,14 +113,22 @@ watch(isDialogOpen, (newValue) => {
   }
 });
 
-watch(openedForm, (newValue) => {
+watch(openedForm, async (newValue) => {
   try {
     if (newValue.type === 'tripDay') {
       isDialogOpen.value = true;
       if (newValue.mode === 'create') {
         tripDayModel.value.tripId = selectedTrip.value._id;
+        tripDayModel.value.tripDate = selectedTrip.value.startDate;
       } else if (newValue.mode === 'edit') {
-        //TODO, edit trip day
+        if (openedForm.value.selectedId) {
+          tripDayModel.value = await tripDayService.findOneById(openedForm.value.selectedId);
+        } else {
+          Notify.create({
+            message: messages.incorrectId,
+            color: 'negative',
+          });
+        }
       }
     }
   } catch (error) {

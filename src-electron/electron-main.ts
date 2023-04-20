@@ -50,16 +50,16 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow();
   enableIPC();
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
 });
 
 app.on('window-all-closed', () => {
   if (platform !== 'darwin') {
     app.quit();
-  }
-});
-
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow();
   }
 });

@@ -10,7 +10,7 @@ export default class BaseStore<T extends Trip | TripDay | Event> {
 
   constructor(fileName: string, schema: JSONSchemaType<T>) {
     // TODO, shouldn't use this file path in packaged app
-    this.filePath = `./src/database/${fileName}`;
+    this.filePath = `./src/data/${fileName}`;
     this.databaseInstance = Datastore.create({
       filename: this.filePath,
       timestampData: true,

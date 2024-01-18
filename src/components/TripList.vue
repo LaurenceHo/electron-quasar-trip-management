@@ -3,11 +3,11 @@
     <q-item
       v-for="trip in trips as TripModel[]"
       :key="trip._id"
-      :active="trip._id === selectedTrip._id"
+      :active="trip._id === selectedTrip?._id"
       active-class="bg-teal-1 text-grey-8"
       clickable
     >
-      <q-item-section side>
+      <q-item-section side v-if="!selectedTripDayId">
         <div class="row items-center">
           <q-btn
             :color="`${trip.starred ? 'primary' : ''}`"
@@ -33,11 +33,11 @@
         </q-item-label>
         <q-item-label caption>{{ trip.name }}</q-item-label>
       </q-item-section>
-      <q-item-section side>
+      <q-item-section side v-if="!selectedTripDayId">
         <q-item-label caption>{{ trip.destination }}</q-item-label>
       </q-item-section>
-      <q-item-section side>
-        <q-btn flat icon="mdi-pencil" round @click="editTrip(trip._id)" />
+      <q-item-section side v-if="!selectedTripDayId">
+        <q-btn flat icon="mdi-pencil" round @click="editTrip(trip._id ?? '')" />
       </q-item-section>
     </q-item>
   </q-list>
@@ -50,7 +50,7 @@ import { Messages } from 'src/constants/messages';
 import { TripModel } from 'src/types/models';
 import { TripService } from 'src/types/type';
 import { appStore } from 'stores/app-store';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 defineProps({
   trips: {
@@ -60,25 +60,23 @@ defineProps({
   },
 });
 
-const emit = defineEmits(['selectTrip']);
-
 const messages = Messages;
-const tripService: TripService = (window as any).TripService;
+const tripService: TripService = window.TripService;
 const store = appStore();
 
-const selectedTrip = ref({
-  timezoneId: '',
-  name: '',
-  startDate: '',
-  endDate: '',
-  destination: '',
-} as TripModel);
+const selectedTrip = computed(() => store.selectedTrip);
+const selectedTripDayId = computed(() => store.selectedTripDayId);
 
 const dateTimeFormat = (dateTime: string) => localDateTimeFormat(dateTime);
 
 const selectTrip = (trip: TripModel) => {
-  selectedTrip.value = trip;
-  emit('selectTrip', trip);
+  if (selectedTrip.value?._id === trip._id) {
+    store.setSelectedTrip(null);
+    store.setSelectedTripDayId('');
+  } else {
+    store.setSelectedTrip(trip);
+    store.setSelectedTripDayId('');
+  }
 };
 
 const editTrip = (tripId: string) => store.setOpenedForm({ type: 'trip', mode: 'edit', selectedId: tripId as any });

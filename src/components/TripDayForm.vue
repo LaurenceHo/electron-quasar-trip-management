@@ -11,7 +11,7 @@
           <q-input v-model="tripDayModel.name" autofocus class="q-pb-lg" dense label="Trip name" outlined />
           <q-input
             v-model="selectedDateDisplay"
-            :rules="[(val) => (val && val.length > 0) || 'This field is required']"
+            :rules="[(val: string) => (val && val.length > 0) || 'This field is required']"
             dense
             label="Trip date"
             outlined
@@ -46,18 +46,10 @@ import { localDateTimeFormat } from 'src/components/helper';
 import { Messages } from 'src/constants/messages';
 import { TripDayService } from 'src/types/type';
 import { appStore } from 'stores/app-store';
-import { computed, ref, toRefs, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { TripDayModel } from '../types/models';
 import { DateTime } from 'luxon';
 
-const props = defineProps({
-  selectedTrip: {
-    type: Object,
-    required: true,
-  },
-});
-
-const { selectedTrip } = toRefs(props);
 const messages = Messages;
 const tripDayService: TripDayService = (window as any).TripDayService;
 
@@ -71,6 +63,7 @@ const isDialogOpen = ref(false);
 const store = appStore();
 
 const openedForm = computed(() => store.openedForm);
+const selectedTrip = computed(() => store.selectedTrip);
 const selectedDateDisplay = computed(() => {
   if (!isEmpty(tripDayModel.value.tripDate)) {
     return localDateTimeFormat(tripDayModel.value.tripDate);
@@ -79,8 +72,8 @@ const selectedDateDisplay = computed(() => {
 });
 
 const calendarOptionsFn = (selectedDate: any) =>
-  selectedDate >= DateTime.fromISO(selectedTrip.value.startDate).toFormat('yyyy/MM/dd') &&
-  selectedDate <= DateTime.fromISO(selectedTrip.value.endDate).toFormat('yyyy/MM/dd');
+  selectedDate >= DateTime.fromISO(selectedTrip.value?.startDate ?? '').toFormat('yyyy/MM/dd') &&
+  selectedDate <= DateTime.fromISO(selectedTrip.value?.endDate ?? '').toFormat('yyyy/MM/dd');
 
 const submit = async () => {
   try {
@@ -118,8 +111,8 @@ watch(openedForm, async (newValue) => {
     if (newValue.type === 'tripDay') {
       isDialogOpen.value = true;
       if (newValue.mode === 'create') {
-        tripDayModel.value.tripId = selectedTrip.value._id;
-        tripDayModel.value.tripDate = selectedTrip.value.startDate;
+        tripDayModel.value.tripId = selectedTrip.value?._id ?? '';
+        tripDayModel.value.tripDate = selectedTrip.value?.startDate ?? '';
       } else if (newValue.mode === 'edit') {
         if (openedForm.value.selectedId) {
           tripDayModel.value = await tripDayService.findOneById(openedForm.value.selectedId);

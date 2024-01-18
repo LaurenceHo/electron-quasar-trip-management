@@ -7,13 +7,20 @@
       <div class="row">
         <div
           :class="[
-            selectedTrip._id && !selectedTripDayId ? 'col-8' : selectedTrip._id && selectedTripDayId ? 'col-4' : 'col',
+            selectedTrip?._id && !selectedTripDayId
+              ? 'col-8'
+              : selectedTrip?._id && selectedTripDayId
+                ? 'col-3'
+                : 'col',
           ]"
         >
-          <TripList :trips="trips" @selectTrip="selectTrip" />
+          <TripList :trips="trips" />
         </div>
-        <div v-if="selectedTrip._id" class="col-4">
-          <TripDayList :selected-trip="selectedTrip" />
+        <div v-if="selectedTrip?._id" class="col-4">
+          <TripDayList />
+        </div>
+        <div v-if="selectedTripDayId" class="col-5">
+          <EventList />
         </div>
       </div>
     </div>
@@ -31,6 +38,7 @@ import { TripModel } from 'src/types/models';
 import { TripService } from 'src/types/type';
 import { appStore } from 'stores/app-store';
 import { computed, onMounted, ref, toRefs, watch } from 'vue';
+import EventList from 'components/EventList.vue';
 
 const props = defineProps({
   filter: {
@@ -41,20 +49,14 @@ const props = defineProps({
 
 const { filter } = toRefs(props);
 const store = appStore();
-const tripService: TripService = (window as any).TripService;
+const tripService: TripService = window.TripService;
 
 const messages = Messages;
 const isLoading = ref(false);
 const trips = ref([] as TripModel[]);
-const selectedTrip = ref({
-  timezoneId: '',
-  name: '',
-  startDate: '',
-  endDate: '',
-  destination: '',
-} as TripModel);
-const selectedTripDayId = ref('');
 
+const selectedTrip = computed(() => store.selectedTrip);
+const selectedTripDayId = computed(() => store.selectedTripDayId);
 const openedForm = computed(() => store.openedForm);
 
 const findTrips = async (keyWord: string): Promise<void> => {
@@ -79,12 +81,13 @@ const findTrips = async (keyWord: string): Promise<void> => {
   }
 };
 
-const selectTrip = (trip: TripModel) => {
-  if (trip._id) {
-    selectedTrip.value = trip;
+watch(selectedTrip, (newValue) => {
+  if (newValue?._id) {
     store.setMiniDrawer(true);
+  } else {
+    store.setMiniDrawer(false);
   }
-};
+});
 
 watch(openedForm, async (newValue, prevValue) => {
   if (prevValue.type === 'trip' && prevValue.mode === 'edit' && newValue.type === null && newValue.mode === null) {
@@ -93,6 +96,8 @@ watch(openedForm, async (newValue, prevValue) => {
 });
 
 watch(filter, async (newValue) => {
+  store.setSelectedTrip(null);
+  store.setSelectedTripDayId('');
   await findTrips(newValue);
 });
 

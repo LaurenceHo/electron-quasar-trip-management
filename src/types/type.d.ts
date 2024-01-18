@@ -1,5 +1,13 @@
 import { EventModel, TripDayModel, TripModel } from 'src/types/models';
 
+declare global {
+  interface Window {
+    TripService: any;
+    TripDayService: any;
+    EventService: any;
+  }
+}
+
 type Nullable<T> = T | null;
 
 export interface BaseService<T> {

@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia';
 import timezone from 'src/constants/timezone.json';
-import { OpenedForm, Option } from 'src/types/models';
+import { OpenedForm, Option, TripModel } from 'src/types/models';
 
 export interface AppStoreState {
   miniDrawer: boolean;
   timezone: Option[];
   openedForm: OpenedForm;
+  selectedTripDayId: string;
+  selectedTrip: TripModel | null;
 }
 
 export const appStore = defineStore('app', {
@@ -18,7 +20,9 @@ export const appStore = defineStore('app', {
         mode: null,
         selectedId: null,
       },
-    } as AppStoreState),
+      selectedTripDayId: '',
+      selectedTrip: null,
+    }) as AppStoreState,
   getters: {},
   actions: {
     setMiniDrawer(payload: boolean) {
@@ -39,6 +43,14 @@ export const appStore = defineStore('app', {
 
     initialTimezone() {
       this.timezone = timezone.map((tz) => ({ label: tz.text, value: tz.utc[0] }));
+    },
+
+    setSelectedTripDayId(tripDayId: string) {
+      this.selectedTripDayId = tripDayId;
+    },
+
+    setSelectedTrip(trip: TripModel | null) {
+      this.selectedTrip = trip;
     },
   },
 });

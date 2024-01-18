@@ -27,7 +27,7 @@
             </q-item>
             <q-expansion-item
               v-else
-              :key="menu.keyWord"
+              :key="`${menu.keyWord}-expansion`"
               :icon="menu.icon"
               :label="menu.title"
               default-opened
@@ -70,7 +70,7 @@
       </div>
     </q-drawer>
     <q-page-container>
-      <dashboard :filter="selectedMenu" />
+      <Dashboard :filter="selectedMenu" />
     </q-page-container>
   </q-layout>
 </template>

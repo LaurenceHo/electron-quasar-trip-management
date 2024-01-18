@@ -1,7 +1,7 @@
 <template>
   <q-list>
     <q-item
-      v-for="trip in trips"
+      v-for="trip in trips as TripModel[]"
       :key="trip._id"
       :active="trip._id === selectedTrip._id"
       active-class="bg-teal-1 text-grey-8"
@@ -28,7 +28,9 @@
         </div>
       </q-item-section>
       <q-item-section @click="selectTrip(trip)">
-        <q-item-label> {{ dateTimeFormat(trip.startDate) }} ~ {{ dateTimeFormat(trip.endDate) }}</q-item-label>
+        <q-item-label class="text-weight-medium">
+          {{ dateTimeFormat(trip.startDate) }} ~ {{ dateTimeFormat(trip.endDate) }}
+        </q-item-label>
         <q-item-label caption>{{ trip.name }}</q-item-label>
       </q-item-section>
       <q-item-section side>
@@ -50,14 +52,15 @@ import { TripService } from 'src/types/type';
 import { appStore } from 'stores/app-store';
 import { ref } from 'vue';
 
-const emit = defineEmits(['selectTrip']);
-const props = defineProps({
+defineProps({
   trips: {
     type: Array,
     required: true,
-    default: () => [],
+    default: () => [] as TripModel[],
   },
 });
+
+const emit = defineEmits(['selectTrip']);
 
 const messages = Messages;
 const tripService: TripService = (window as any).TripService;

@@ -9,25 +9,38 @@
     <q-item
       v-for="tripDay in tripDays"
       :key="tripDay._id"
-      :active="tripDay._id === selectedTrip"
+      :active="tripDay._id === selectedTripDayId"
       active-class="bg-teal-1 text-grey-8"
       clickable
     >
-      <q-item-section @click="selectTripDay(tripDay._id)">
-        <q-item-label>
+      <q-item-section @click="selectTripDay(tripDay._id ?? '')">
+        <q-item-label class="text-weight-medium">
           {{ dateTimeFormat(tripDay.tripDate) }}
         </q-item-label>
         <q-item-label caption>{{ tripDay.name }}</q-item-label>
       </q-item-section>
       <q-item-section side>
         <div class="row">
-          <q-btn flat icon="mdi-pencil" round @click="editTripDay(tripDay._id)" />
-          <q-btn flat icon="mdi-delete" round @click="deleteTripDay(tripDay._id)" />
+          <q-btn flat icon="mdi-pencil" round @click="editTripDay(tripDay._id ?? '')" />
+          <q-btn flat icon="mdi-delete" round @click="openConfirmDialog(tripDay._id ?? '')" />
         </div>
       </q-item-section>
     </q-item>
   </q-list>
-  <trip-day-form :selected-trip="selectedTrip" />
+  <TripDayForm :selected-trip="selectedTrip" />
+  <q-dialog v-model="confirmDialog" persistent>
+    <q-card>
+      <q-card-section class="row items-center">
+        <q-icon color="primary" name="mdi-alert-circle" size="md" />
+        <span class="q-ml-sm">Are you sure you want to delete trip day? It cannot be undone.</span>
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn flat label="Cancel" color="primary" v-close-popup />
+        <q-btn flat label="Confirm" color="primary" @click="deleteTripDay(selectedTripDayId)" v-close-popup />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -50,13 +63,14 @@ const tripDayService: TripDayService = (window as any).TripDayService;
 const store = appStore();
 
 const tripDays = ref([] as TripDayModel[]);
-const selectedTripDay = ref('');
+const selectedTripDayId = ref('');
+const confirmDialog = ref(false);
 
 const openedForm = computed(() => store.openedForm);
 
 const dateTimeFormat = (dateTime: string) => localDateTimeFormat(dateTime);
 
-const selectTripDay = (tripDayId: string) => (selectedTripDay.value = tripDayId);
+const selectTripDay = (tripDayId: string) => (selectedTripDayId.value = tripDayId);
 
 const createTripDay = () =>
   store.setOpenedForm({
@@ -76,7 +90,11 @@ const deleteTripDay = async (tripDayId: string) => {
   await (tripDayService as any).delete(tripDayId);
   // Refresh trip day list
   tripDays.value = await tripDayService.findTripDaysByTrip(selectedTrip.value._id);
-  // TODO, should open confirm modal
+};
+
+const openConfirmDialog = (tripDayId: string) => {
+  confirmDialog.value = true;
+  selectedTripDayId.value = tripDayId;
 };
 
 onMounted(async () => {

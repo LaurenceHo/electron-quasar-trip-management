@@ -1,3 +1,9 @@
+@import "fonts";
+
+html, body {
+  font-family: inter, serif;
+}
+
 // app global css in SCSS form
 .q-menu {
   border-radius: 0;

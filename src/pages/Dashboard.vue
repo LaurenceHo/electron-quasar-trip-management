@@ -7,11 +7,7 @@
       <div class="row">
         <div
           :class="[
-            selectedTrip._id && selectedTripDayId.length === 0
-              ? 'col-8'
-              : selectedTrip._id > 0 && selectedTripDayId > 0
-              ? 'col-4'
-              : 'col',
+            selectedTrip._id && !selectedTripDayId ? 'col-8' : selectedTrip._id && selectedTripDayId ? 'col-4' : 'col',
           ]"
         >
           <TripList :trips="trips" @selectTrip="selectTrip" />

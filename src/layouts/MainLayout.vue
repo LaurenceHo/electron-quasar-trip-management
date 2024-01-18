@@ -32,6 +32,8 @@
               :label="menu.title"
               default-opened
               expand-separator
+              expand-icon="mdi-chevron-down"
+              expanded-icon="mdi-chevron-up"
             >
               <q-list padding>
                 <q-item
@@ -57,7 +59,7 @@
       <div class="q-mini-drawer-hide absolute" style="top: 15px; right: -12px">
         <q-btn
           class="app-drawer-button"
-          color="accent"
+          color="primary"
           dense
           icon="mdi-chevron-left"
           round

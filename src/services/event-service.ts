@@ -1,5 +1,5 @@
-import EventStore from '../database/event-store';
-import { EventSchema } from '../database/schemas';
+import EventStore from 'database/event-store';
+import { EventSchema } from 'database/schemas';
 import { EventModel } from '../types/models';
 import { EventService as IEventService } from '../types/type';
 

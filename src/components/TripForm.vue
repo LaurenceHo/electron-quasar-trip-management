@@ -12,7 +12,7 @@
           <div class="row q-col-gutter-md q-pb-lg">
             <q-input
               v-model="tripModel.destination"
-              :rules="[(val) => (val && val.length > 0) || 'Destination is required']"
+              :rules="[(val: string) => (val && val.length > 0) || 'Destination is required']"
               class="col"
               dense
               hint="This field is required"
@@ -22,9 +22,10 @@
             <q-select
               v-model="tripModel.timezoneId"
               :options="timezoneList"
-              :rules="[(val) => (val && val.length > 0) || 'Timezone is required']"
+              :rules="[(val: string) => (val && val.length > 0) || 'Timezone is required']"
               class="col"
               dense
+              dropdown-icon="mdi-menu-down"
               emit-value
               hint="This field is required"
               label="Timezone"
@@ -34,7 +35,7 @@
           </div>
           <q-input
             v-model="dateRangeDisplay"
-            :rules="[(val) => (val && val.length > 0) || 'Date range is required']"
+            :rules="[(val: string) => (val && val.length > 0) || 'Date range is required']"
             class="q-pb-lg"
             dense
             hint="This field is required"
